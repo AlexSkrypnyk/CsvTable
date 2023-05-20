@@ -7,20 +7,98 @@
 ## Features
 
 - Single-file class to manipulate CSV table.
-- Converter to Markdown table.
-- Allows to provide custom converter.
+- Renderers for CSV and text table.
+- Ability to provide custom renderer.
 
 ## Installation
 
 ```bash
-composer require AlexSkrypnyk/CsvTable
+composer require alexskrypnyk/csvtable
 ```    
 
 ## Usage
 
+Given a CSV file with the following content:
+```csv
+col11,col12,col13
+col21,col22,col23
+col31,col32,col33      
+```
+
+### From string
+
 ```php
-$csvTable = new CsvTable();
-$csvTable->toMarkdown()
+$csv = file_get_contents($csv_file);
+// Render using the default renderer.
+print (new CsvTable($csv))->render();
+```
+will produce identical CSV content by default:
+```csv
+col11,col12,col13
+col21,col22,col23
+col31,col32,col33      
+```
+
+### From file
+
+```php
+print (CsvTable::fromFile($file))->render();
+```
+will produce identical CSV content by default:
+```csv
+col11,col12,col13
+col21,col22,col23
+col31,col32,col33
+```
+
+### Using `CsvTable::renderTextTable()` renderer
+
+```php
+print (CsvTable::fromFile($file))->render([CsvTable::class, 'renderTextTable']);
+```
+will produce CSV content:
+```csv
+col11|col12|col13
+-----------------
+col21|col22|col23
+col31|col32|col33     
+```
+
+### Using `CsvTable::renderTextTable()` renderer with disabled header
+
+```php
+print (CsvTable::fromFile($file))->noHeader()->render([CsvTable::class, 'renderTextTable']);
+```
+will produce CSV content:
+```csv
+col11|col12|col13
+col21|col22|col23
+col31|col32|col33     
+```
+
+### Custom renderer
+
+```php
+print (CsvTable::fromFile($file))->render(function ($header, $rows, $options) {
+  if (count($header) > 0) {
+    $header = implode('|', $header);
+    $header = $header . "\n" . str_repeat('-', strlen($header)) . "\n";
+  }
+  else {
+    $header = '';
+  }
+
+  return $header . implode("\n", array_map(function ($row) {
+    return implode('|', $row);
+  }, $rows));
+});
+```
+will produce CSV content:
+```csv
+col11|col12|col13
+-----------------
+col21|col22|col23
+col31|col32|col33     
 ```
 
 ## Maintenance
