@@ -56,7 +56,7 @@ col31,col32,col33
 ```php
 print (CsvTable::fromFile($file))->render([CsvTable::class, 'renderTextTable']);
 ```
-will produce CSV content:
+will produce table content:
 ```csv
 col11|col12|col13
 -----------------
@@ -69,14 +69,27 @@ col31|col32|col33
 ```php
 print (CsvTable::fromFile($file))->noHeader()->render([CsvTable::class, 'renderTextTable']);
 ```
-will produce CSV content:
+will produce table content:
 ```csv
 col11|col12|col13
 col21|col22|col23
 col31|col32|col33     
 ```
 
-### Custom renderer
+### Custom renderer from class
+
+```php
+print (CsvTable::fromFile($file))->render(AlexSkrypnyk\CsvTable\Markdown::class);
+```
+will produce Markdown content:
+```markdown
+| col11 | col12 | col13 |
+|-------|-------|-------|
+| col21 | col22 | col23 |
+| col31 | col32 | col33 |     
+```
+
+### Custom renderer as a callback
 
 ```php
 print (CsvTable::fromFile($file))->render(function ($header, $rows, $options) {

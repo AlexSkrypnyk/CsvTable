@@ -155,32 +155,34 @@ class CsvTable {
   /**
    * Render the CSV data.
    *
-   * @param callable|null $formatter
-   *   A callable to format the output. Defaults to NULL, which uses the default
-   *   formatter.
-   * @param array $formatter_options
-   *   An array of options to pass to the formatter. Defaults to an empty array.
+   * @param callable|null $renderer
+   *   A callable to renderer the output. Defaults to NULL, which uses the
+   *   default renderer.
+   * @param array $options
+   *   An array of options to pass to the renderer. Defaults to an empty array.
    *
    * @return string
    *   The formatted output.
    *
-   * @throws Exception
-   *   When the formatter is not callable.
+   * @throws \Exception
+   *   When the renderer is not callable.
    */
-  public function render(callable $formatter = NULL, array $formatter_options = []): string {
-    $formatter = $formatter ?: [$this, 'renderCsv'];
+  public function render(callable|string $renderer = NULL, array $options = []): string {
+    $renderer = $renderer
+      ? (is_string($renderer) && class_exists($renderer) ? [$renderer, 'render'] : $renderer)
+      : [$this, 'renderCsv'];
 
-    if (!is_callable($formatter)) {
-      throw new \Exception('Formatter must be callable');
+    if (!is_callable($renderer)) {
+      throw new \Exception('Renderer must be callable');
     }
 
-    $formatter_options += [
+    $options += [
       'separator' => $this->csvSeparator,
       'enclosure' => $this->csvEnclosure,
       'escape' => $this->csvEscape,
     ];
 
-    return call_user_func($formatter, $this->header, $this->rows, $formatter_options);
+    return call_user_func($renderer, $this->header, $this->rows, $options);
   }
 
   /**
@@ -236,7 +238,7 @@ class CsvTable {
   }
 
   /**
-   * Render as text table.
+   * Render as a table.
    *
    * @param array $header
    *   An array containing the header row.
@@ -248,7 +250,7 @@ class CsvTable {
    * @return string
    *   The formatted output.
    */
-  public static function renderTextTable($header, $rows, $options): string {
+  public static function renderTable($header, $rows, $options): string {
     if (count($header) > 0) {
       $header = implode('|', $header);
       $header = $header . "\n" . str_repeat('-', strlen($header)) . "\n";

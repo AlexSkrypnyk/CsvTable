@@ -4,11 +4,9 @@ use AlexSkrypnyk\CsvTable\CsvTable;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class ScriptUnitTestBase.
+ * Class CsvTableUnitTest.
  *
- * Base class to unit tests scripts.
- *
- * @group scripts
+ * Unit tests for CsvTable and default renderers.
  */
 class CsvTableUnitTest extends TestCase {
 
@@ -90,12 +88,12 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test renderTextTable() renderer.
+   * Test renderTable() renderer.
    */
-  public function testRenderTextTable() {
+  public function testRenderTable() {
     $csv = self::fixtureCsv();
 
-    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderTextTable']);
+    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderTable']);
 
     $this->assertEquals(<<< EOD
     col11|col12|col13
