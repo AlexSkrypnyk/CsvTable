@@ -1,0 +1,23 @@
+{
+    "name": "alexskrypnyk/csvtable",
+    "type": "library",
+    "description": "PHP class to work with CSV as a table and export it as Markdown.",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Alex Skrypnyk",
+            "email": "alex@drevops.com",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://github.com/AlexSkrypnyk/CsvTable",
+    "support": {
+        "issues": "https://github.com/AlexSkrypnyk/CsvTable/issues",
+        "source": "https://github.com/AlexSkrypnyk/CsvTable"
+    },
+    "require": {},
+    "scripts": {
+        "lint": "echo Would run code lint",
+        "test": "echo Would run tests"
+    }
+}
