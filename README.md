@@ -79,7 +79,7 @@ col31|col32|col33
 ### Custom renderer from class
 
 ```php
-print (CsvTable::fromFile($file))->render(AlexSkrypnyk\CsvTable\Markdown::class);
+print (CsvTable::fromFile($file))->render(Markdown::class);
 ```
 will produce Markdown content:
 ```markdown
