@@ -16,8 +16,8 @@
         "source": "https://github.com/AlexSkrypnyk/CsvTable"
     },
     "scripts": {
-        "lint": "vendor/bin/phpcs -s --standard=Drupal CsvTable.php tests",
-        "lint:fix": "vendor/bin/phpcbf -s --standard=Drupal CsvTable.php tests",
+        "lint": "vendor/bin/phpcs -s --standard=Drupal CsvTable.php Markdown.php tests",
+        "lint:fix": "vendor/bin/phpcbf -s --standard=Drupal CsvTable.php Markdown.php tests",
         "test": "phpunit --display-deprecations --display-notices --display-warnings tests"
     },
     "require": {
