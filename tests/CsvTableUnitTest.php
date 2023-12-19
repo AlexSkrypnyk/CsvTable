@@ -72,8 +72,8 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test getters.
    *
-   * @covers \CsvTable::getRows
-   * @covers \CsvTable::getHeader
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::getRows
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::getHeader
    */
   public function testGetters(): void {
     $csv = self::fixtureCsv();
