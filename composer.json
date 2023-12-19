@@ -40,7 +40,7 @@
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
             "phpstan"
         ],
-        "lint:fix": "vendor/bin/phpcbf",
+        "lint:fix": "phpcbf",
         "test": "phpunit --no-coverage",
         "test:coverage": "XDEBUG_MODE=coverage phpunit",
         "build": [

@@ -9,8 +9,6 @@ use PHPUnit\Framework\TestCase;
  * Class CsvTableUnitTest.
  *
  * Unit tests for CsvTable and default renderers.
- *
- * @covers ::main
  */
 class CsvTableUnitTest extends TestCase {
 
@@ -33,6 +31,8 @@ class CsvTableUnitTest extends TestCase {
    * Test the default behavior using default renderCsv() renderer.
    *
    * @dataProvider dataProviderDefault
+   *
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testDefault(string $csv, bool|null $hasHeader, string $expected): void {
     $table = new CsvTable($csv);
@@ -71,6 +71,9 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test getters.
+   *
+   * @covers \CsvTable::getRows
+   * @covers \CsvTable::getHeader
    */
   public function testGetters(): void {
     $csv = self::fixtureCsv();
@@ -96,6 +99,9 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test renderTable() renderer.
+   *
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::renderTable
    */
   public function testRenderTable(): void {
     $csv = self::fixtureCsv();
@@ -112,6 +118,8 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test using a custom formatter.
+   *
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testAnotherFormatter(): void {
     $csv = self::fixtureCsv();
@@ -142,6 +150,8 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test custom CSV separator.
+   *
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testCustomCsvSeparator(): void {
     $csv = str_replace(',', ';', self::fixtureCsv());
@@ -152,6 +162,8 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test support for CSV multiline.
+   *
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testCustomCsvMultiline(): void {
     $csv = <<< EOD
@@ -166,6 +178,8 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test creating of the class instance using fromFile().
+   *
+   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testFromFile(): void {
     $csv = self::fixtureCsv();
