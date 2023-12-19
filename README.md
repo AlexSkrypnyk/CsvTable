@@ -1,8 +1,27 @@
-# CsvTable
+<p align="center">
+  <a href="" rel="noopener">
+  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=CsvTable&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="Yourproject logo"></a>
+</p>
 
-[![Tests](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test.yml/badge.svg)](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test.yml)
+<h1 align="center">CsvTable</h1>
+
+<div align="center">
+
+[![GitHub Issues](https://img.shields.io/github/issues/AlexSkrypnyk/CsvTable.svg)](https://github.com/AlexSkrypnyk/CsvTable/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/CsvTable.svg)](https://github.com/AlexSkrypnyk/CsvTable/pulls)
+[![Test](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test.yml/badge.svg)](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/AlexSkrypnyk/CsvTable/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/CsvTable)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/CsvTable)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/CsvTable)
+![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
+
+</div>
+
+---
+
+<p align="center"> PHP class to work with CSV as a table and export it as Markdown.
+    <br>
+</p>
 
 ## Features
 

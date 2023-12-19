@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 use AlexSkrypnyk\CsvTable\CsvTable;
 use AlexSkrypnyk\CsvTable\Markdown;
 use PHPUnit\Framework\TestCase;
@@ -13,8 +15,10 @@ class MarkdownUnitTest extends TestCase {
 
   /**
    * Test render().
+   *
+   * @covers \AlexSkrypnyk\CsvTable\Markdown::render
    */
-  public function testRender() {
+  public function testRender(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab cde",col23abc
@@ -34,8 +38,10 @@ class MarkdownUnitTest extends TestCase {
 
   /**
    * Test render() for multiline.
+   *
+   * @covers \AlexSkrypnyk\CsvTable\Markdown::render
    */
-  public function testRenderMultiline() {
+  public function testRenderMultiline(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab\ncdef",col23abc
@@ -55,8 +61,10 @@ class MarkdownUnitTest extends TestCase {
 
   /**
    * Test render() for multiline and no header.
+   *
+   * @covers \AlexSkrypnyk\CsvTable\Markdown::render
    */
-  public function testRenderMultilineNoHeader() {
+  public function testRenderMultilineNoHeader(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab\ncdef",col23abc
