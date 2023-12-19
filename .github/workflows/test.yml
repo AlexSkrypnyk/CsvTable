@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - main
-      - 'feature/**'
 jobs:
   test-php:
     runs-on: ubuntu-latest
