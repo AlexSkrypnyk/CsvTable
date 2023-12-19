@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace AlexSkrypnyk\CsvTable;
 
 /**
@@ -14,49 +16,49 @@ class CsvTable {
    *
    * @var string
    */
-  protected $csvString;
+  protected string $csvString;
 
   /**
    * The character used to separate values in the CSV data.
    *
    * @var string
    */
-  protected $csvSeparator;
+  protected string $csvSeparator;
 
   /**
    * The character used to enclose values in the CSV data.
    *
    * @var string
    */
-  protected $csvEnclosure;
+  protected string $csvEnclosure;
 
   /**
    * The character used to escape special characters in the CSV data.
    *
    * @var string
    */
-  protected $csvEscape;
+  protected string $csvEscape;
 
   /**
    * Array containing the header row from the CSV data.
    *
-   * @var array
+   * @var array<string>
    */
-  protected $header = [];
+  protected array $header = [];
 
   /**
    * Array containing all non-header rows from the CSV data.
    *
-   * @var array
+   * @var array<array<string>>
    */
-  protected $rows = [];
+  protected array $rows = [];
 
   /**
    * Boolean flag indicating whether the header should be parsed.
    *
    * @var bool
    */
-  protected $useHeader = TRUE;
+  protected bool $useHeader = TRUE;
 
   /**
    * Constructs a CsvTable object.
@@ -71,7 +73,7 @@ class CsvTable {
    *   The character used to escape special characters in the CSV data.
    *   Defaults to '\\'.
    */
-  public function __construct($csvString = NULL, $separator = ',', $enclosure = '"', $escape = '\\') {
+  public function __construct(string $csvString = NULL, string $separator = ',', string $enclosure = '"', string $escape = '\\') {
     $this->csvSeparator = $separator;
     $this->csvEnclosure = $enclosure;
     $this->csvEscape = $escape;
@@ -86,7 +88,7 @@ class CsvTable {
   /**
    * Get header columns.
    *
-   * @return array
+   * @return array<string>
    *   Array of header columns.
    */
   public function getHeader(): array {
@@ -96,7 +98,7 @@ class CsvTable {
   /**
    * Get rows without the header.
    *
-   * @return array
+   * @return array<array<string>>
    *   Array of rows without the header.
    */
   public function getRows(): array {
@@ -108,7 +110,7 @@ class CsvTable {
    *
    * @return $this
    */
-  public function hasHeader() {
+  public function hasHeader(): static {
     $this->useHeader = TRUE;
     $this->parse();
     return $this;
@@ -119,7 +121,7 @@ class CsvTable {
    *
    * @return $this
    */
-  public function noHeader() {
+  public function noHeader(): static {
     $this->useHeader = FALSE;
     $this->parse();
     return $this;
@@ -141,24 +143,24 @@ class CsvTable {
    * @return CsvTable
    *   A new CsvTable object containing the contents of the file.
    *
-   * @throws Exception
+   * @throws \Exception
    *   When the file is not readable.
    */
-  public static function fromFile($filepath, $separator = ',', $enclosure = '"', $escape = '\\') {
+  public static function fromFile($filepath, $separator = ',', $enclosure = '"', $escape = '\\'): CsvTable {
     if (!is_readable($filepath)) {
       throw new \Exception('File not readable');
     }
-
+    /* @phpstan-ignore-next-line */
     return new static(file_get_contents($filepath), $separator, $enclosure, $escape);
   }
 
   /**
    * Render the CSV data.
    *
-   * @param callable|null $renderer
+   * @param callable|string|null $renderer
    *   A callable to renderer the output. Defaults to NULL, which uses the
    *   default renderer.
-   * @param array $options
+   * @param array<mixed> $options
    *   An array of options to pass to the renderer. Defaults to an empty array.
    *
    * @return string
@@ -188,19 +190,19 @@ class CsvTable {
   /**
    * Parse the CSV string into header and rows.
    */
-  protected function parse() {
+  protected function parse(): void {
     $rows = [];
 
     if (!empty($this->csvString)) {
       $stream = fopen('php://memory', 'r+');
-      fwrite($stream, $this->csvString);
-      rewind($stream);
-
-      while (($data = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
-        $rows[] = $data;
+      if ($stream) {
+        fwrite($stream, $this->csvString);
+        rewind($stream);
+        while (($data = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
+          $rows[] = $data;
+        }
+        fclose($stream);
       }
-
-      fclose($stream);
     }
 
     $this->header = $this->useHeader && count($rows) > 0 ? array_slice($rows, 0, 1)[0] : [];
@@ -210,29 +212,33 @@ class CsvTable {
   /**
    * Render as CSV.
    *
-   * @param array $header
+   * @param array<string> $header
    *   An array containing the header row.
-   * @param array $rows
+   * @param array<array<string>> $rows
    *   An array containing all non-header rows.
-   * @param array $options
+   * @param array<mixed> $options
    *   An array of options for the renderer.
    *
    * @return string
    *   The formatted output.
    */
-  public static function renderCsv($header, $rows, $options): string {
+  public static function renderCsv(array $header, array $rows, array $options): string {
+    $output = '';
     $out = fopen('php://temp/maxmemory:' . (5 * 1024 * 1024), 'r+');
+    if ($out) {
+      if (count($header) > 0) {
+        /* @phpstan-ignore-next-line */
+        fputcsv($out, $header, $options['separator'], $options['enclosure'], $options['escape']);
+      }
+      foreach ($rows as $row) {
+        /* @phpstan-ignore-next-line */
+        fputcsv($out, $row, $options['separator'], $options['enclosure'], $options['escape']);
+      }
 
-    if (count($header) > 0) {
-      fputcsv($out, $header, $options['separator'], $options['enclosure'], $options['escape']);
+      rewind($out);
+      $output = (string) stream_get_contents($out);
+      fclose($out);
     }
-    foreach ($rows as $row) {
-      fputcsv($out, $row, $options['separator'], $options['enclosure'], $options['escape']);
-    }
-
-    rewind($out);
-    $output = stream_get_contents($out);
-    fclose($out);
 
     return $output;
   }
@@ -240,17 +246,15 @@ class CsvTable {
   /**
    * Render as a table.
    *
-   * @param array $header
+   * @param array<string> $header
    *   An array containing the header row.
-   * @param array $rows
+   * @param array<array<string>> $rows
    *   An array containing all non-header rows.
-   * @param array $options
-   *   An array of options for the renderer.
    *
    * @return string
    *   The formatted output.
    */
-  public static function renderTable($header, $rows, $options): string {
+  public static function renderTable(array $header, array $rows): string {
     if (count($header) > 0) {
       $header = implode('|', $header);
       $header = $header . "\n" . str_repeat('-', strlen($header)) . "\n";

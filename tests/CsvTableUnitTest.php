@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 use AlexSkrypnyk\CsvTable\CsvTable;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +18,7 @@ class CsvTableUnitTest extends TestCase {
    * @return string
    *   CSV string.
    */
-  protected static function fixtureCsv() {
+  protected static function fixtureCsv(): string {
     return <<< EOD
     col11,col12,col13
     col21,col22,col23
@@ -30,7 +32,7 @@ class CsvTableUnitTest extends TestCase {
    *
    * @dataProvider dataProviderDefault
    */
-  public function testDefault($csv, $hasHeader, $expected) {
+  public function testDefault(string $csv, bool|null $hasHeader, string $expected): void {
     $table = new CsvTable($csv);
 
     if (!is_null($hasHeader)) {
@@ -49,8 +51,11 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Data provider for testDefault().
+   *
+   * @return array<mixed>
+   *   Data provider
    */
-  public static function dataProviderDefault() {
+  public static function dataProviderDefault(): array {
     return [
       ['', NULL, ''],
       ['', TRUE, ''],
@@ -65,7 +70,7 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test getters.
    */
-  public function testGetters() {
+  public function testGetters(): void {
     $csv = self::fixtureCsv();
 
     $table = new CsvTable($csv);
@@ -90,7 +95,7 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test renderTable() renderer.
    */
-  public function testRenderTable() {
+  public function testRenderTable(): void {
     $csv = self::fixtureCsv();
 
     $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderTable']);
@@ -106,7 +111,7 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test using a custom formatter.
    */
-  public function testAnotherFormatter() {
+  public function testAnotherFormatter(): void {
     $csv = self::fixtureCsv();
 
     $custom_renderer = function ($header, $rows) {
@@ -136,7 +141,7 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test custom CSV separator.
    */
-  public function testCustomCsvSeparator() {
+  public function testCustomCsvSeparator(): void {
     $csv = str_replace(',', ';', self::fixtureCsv());
     $actual = (new CsvTable($csv, ';'))
       ->render();
@@ -146,7 +151,7 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test support for CSV multiline.
    */
-  public function testCustomCsvMultiline() {
+  public function testCustomCsvMultiline(): void {
     $csv = <<< EOD
     col11,col12,col13
     col21,"col22\ncol22secondline",col23
@@ -160,11 +165,11 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test creating of the class instance using fromFile().
    */
-  public function testFromFile() {
+  public function testFromFile(): void {
     $csv = self::fixtureCsv();
     $file = tempnam(sys_get_temp_dir(), 'csv');
-    file_put_contents($file, $csv);
-    $actual = (CsvTable::fromFile($file))->render();
+    file_put_contents((string) $file, $csv);
+    $actual = (CsvTable::fromFile((string) $file))->render();
     $this->assertEquals($csv, $actual);
   }
 
