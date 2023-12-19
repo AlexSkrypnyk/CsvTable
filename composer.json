@@ -42,11 +42,6 @@
         ],
         "lint:fix": "phpcbf",
         "test": "phpunit --no-coverage",
-        "test:coverage": "XDEBUG_MODE=coverage phpunit",
-        "build": [
-            "@composer bin box require --dev humbug/box",
-            "box validate",
-            "box compile"
-        ]
+        "test:coverage": "XDEBUG_MODE=coverage phpunit"
     }
 }
