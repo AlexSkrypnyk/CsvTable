@@ -9,9 +9,9 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class MarkdownUnitTest.
  *
- * @covers ::main
- *
  * Unit tests for Markdown renderer.
+ *
+ * @covers ::main
  */
 class MarkdownUnitTest extends TestCase {
 

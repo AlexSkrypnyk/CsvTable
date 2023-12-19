@@ -8,9 +8,9 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class CsvTableUnitTest.
  *
- * @covers ::main
- *
  * Unit tests for CsvTable and default renderers.
+ *
+ * @covers ::main
  */
 class CsvTableUnitTest extends TestCase {
 
