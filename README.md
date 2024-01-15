@@ -9,7 +9,7 @@
 
 [![GitHub Issues](https://img.shields.io/github/issues/AlexSkrypnyk/CsvTable.svg)](https://github.com/AlexSkrypnyk/CsvTable/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/CsvTable.svg)](https://github.com/AlexSkrypnyk/CsvTable/pulls)
-[![Test](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test.yml/badge.svg)](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test.yml)
+[![Test](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test-php.yml/badge.svg)](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test-php.yml)
 [![codecov](https://codecov.io/gh/AlexSkrypnyk/CsvTable/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/CsvTable)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/CsvTable)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/CsvTable)

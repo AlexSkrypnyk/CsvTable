@@ -34,8 +34,6 @@ class Markdown {
 
   /**
    * Number of columns.
-   *
-   * @var int
    */
   protected int $colCount = 0;
 
@@ -59,7 +57,7 @@ class Markdown {
   public function __construct(array $header, array $rows, array $options = []) {
     $this->header = array_map([self::class, 'processValue'], $header);
 
-    $this->rows = array_map(function ($row) {
+    $this->rows = array_map(static function ($row): array {
       return array_map([self::class, 'processValue'], $row);
     }, $rows);
     $this->options = $options + ['column_separator' => '|'];
@@ -117,9 +115,8 @@ class Markdown {
     }
 
     $output .= str_pad($row[$this->colCount - 1], $this->colWidths[$this->colCount - 1]);
-    $output .= ' ' . $this->options['column_separator'] . "\n";
 
-    return $output;
+    return $output . (' ' . $this->options['column_separator'] . "\n");
   }
 
   /**
@@ -165,7 +162,7 @@ class Markdown {
   /**
    * Process value.
    */
-  protected function processValue(string $value): string {
+  public static function processValue(string $value): string {
     return (string) preg_replace('/(\r\n|\n|\r)/', '<br />', $value);
   }
 

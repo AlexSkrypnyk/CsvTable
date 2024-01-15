@@ -22,7 +22,8 @@
         "drupal/coder": "^8.3",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.1"
+        "phpunit/phpunit": "^10.1",
+        "rector/rector": "^0.19.0"
     },
     "autoload": {
         "psr-4": {
@@ -38,10 +39,10 @@
         "lint": [
             "phpcs",
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
-            "phpstan"
+            "phpstan",
+            "rector --dry-run"
         ],
         "lint:fix": "phpcbf",
-        "test": "phpunit --no-coverage",
-        "test:coverage": "XDEBUG_MODE=coverage phpunit"
+        "test": "if [ \"${XDEBUG_MODE}\" = 'coverage' ]; then phpunit; else phpunit --no-coverage; fi"
     }
 }
