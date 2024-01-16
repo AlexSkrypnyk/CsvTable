@@ -10,13 +10,13 @@ use PHPUnit\Framework\TestCase;
  * Class MarkdownUnitTest.
  *
  * Unit tests for Markdown renderer.
+ *
+ * @covers \AlexSkrypnyk\CsvTable\Markdown
  */
 class MarkdownUnitTest extends TestCase {
 
   /**
    * Test render().
-   *
-   * @covers \AlexSkrypnyk\CsvTable\Markdown::render
    */
   public function testRender(): void {
     $csv = <<< EOD
@@ -38,8 +38,6 @@ class MarkdownUnitTest extends TestCase {
 
   /**
    * Test render() for multiline.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\Markdown::render
    */
   public function testRenderMultiline(): void {
     $csv = <<< EOD
@@ -61,8 +59,6 @@ class MarkdownUnitTest extends TestCase {
 
   /**
    * Test render() for multiline and no header.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\Markdown::render
    */
   public function testRenderMultilineNoHeader(): void {
     $csv = <<< EOD

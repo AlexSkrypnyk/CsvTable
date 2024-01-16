@@ -9,6 +9,8 @@ use PHPUnit\Framework\TestCase;
  * Class CsvTableUnitTest.
  *
  * Unit tests for CsvTable and default renderers.
+ *
+ * @covers \AlexSkrypnyk\CsvTable\CsvTable
  */
 class CsvTableUnitTest extends TestCase {
 
@@ -31,8 +33,6 @@ class CsvTableUnitTest extends TestCase {
    * Test the default behavior using default renderCsv() renderer.
    *
    * @dataProvider dataProviderDefault
-   *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testDefault(string $csv, bool|null $hasHeader, string $expected): void {
     $table = new CsvTable($csv);
@@ -99,14 +99,12 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test renderTable() renderer.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::renderTable
    */
   public function testRenderTable(): void {
     $csv = self::fixtureCsv();
-
-    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderTable']);
+    // With header.
+    $actual = (new CsvTable($csv))
+      ->render(CsvTable::renderTable(...));
 
     $this->assertEquals(<<< EOD
     col11|col12|col13
@@ -114,17 +112,36 @@ class CsvTableUnitTest extends TestCase {
     col21|col22|col23
     col31|col32|col33
     EOD, $actual);
+
+    // No header.
+    $actual = (new CsvTable($csv))
+      ->noHeader()
+      ->render(CsvTable::renderTable(...));
+    $this->assertEquals(<<< EOD
+    col11|col12|col13
+    col21|col22|col23
+    col31|col32|col33
+    EOD, $actual);
+  }
+
+  /**
+   * Test pass not callable to render().
+   */
+  public function testRenderNotCallable(): void {
+    $csv = self::fixtureCsv();
+
+    $this->expectException(\Exception::class);
+    (new CsvTable($csv))
+      ->render('Not callable');
   }
 
   /**
    * Test using a custom formatter.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testAnotherFormatter(): void {
     $csv = self::fixtureCsv();
 
-    $custom_renderer = function ($header, $rows) {
+    $custom_renderer = static function ($header, $rows): string {
       if (count($header) > 0) {
         $header = implode('|', $header);
         $header = $header . "\n" . str_repeat('=', strlen($header)) . "\n";
@@ -133,7 +150,7 @@ class CsvTableUnitTest extends TestCase {
         $header = '';
       }
 
-      return $header . implode("\n", array_map(function ($row) {
+      return $header . implode("\n", array_map(static function ($row): string {
         return implode('|', $row);
       }, $rows));
     };
@@ -150,8 +167,6 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test custom CSV separator.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testCustomCsvSeparator(): void {
     $csv = str_replace(',', ';', self::fixtureCsv());
@@ -162,8 +177,6 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test support for CSV multiline.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
    */
   public function testCustomCsvMultiline(): void {
     $csv = <<< EOD
@@ -179,7 +192,7 @@ class CsvTableUnitTest extends TestCase {
   /**
    * Test creating of the class instance using fromFile().
    *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::render
+   * @throws Exception
    */
   public function testFromFile(): void {
     $csv = self::fixtureCsv();
@@ -187,6 +200,9 @@ class CsvTableUnitTest extends TestCase {
     file_put_contents((string) $file, $csv);
     $actual = (CsvTable::fromFile((string) $file))->render();
     $this->assertEquals($csv, $actual);
+
+    $this->expectException(\Exception::class);
+    CsvTable::fromFile('non-existing-file.csv');
   }
 
 }

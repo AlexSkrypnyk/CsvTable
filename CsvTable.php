@@ -12,34 +12,6 @@ namespace AlexSkrypnyk\CsvTable;
 class CsvTable {
 
   /**
-   * The CSV data as a string.
-   *
-   * @var string
-   */
-  protected string $csvString;
-
-  /**
-   * The character used to separate values in the CSV data.
-   *
-   * @var string
-   */
-  protected string $csvSeparator;
-
-  /**
-   * The character used to enclose values in the CSV data.
-   *
-   * @var string
-   */
-  protected string $csvEnclosure;
-
-  /**
-   * The character used to escape special characters in the CSV data.
-   *
-   * @var string
-   */
-  protected string $csvEscape;
-
-  /**
    * Array containing the header row from the CSV data.
    *
    * @var array<string>
@@ -55,8 +27,6 @@ class CsvTable {
 
   /**
    * Boolean flag indicating whether the header should be parsed.
-   *
-   * @var bool
    */
   protected bool $useHeader = TRUE;
 
@@ -65,23 +35,18 @@ class CsvTable {
    *
    * @param string|null $csvString
    *   The CSV data as a string. Defaults to NULL.
-   * @param string $separator
+   * @param string $csvSeparator
    *   The character used to separate values in the CSV data. Defaults to ','.
-   * @param string $enclosure
+   * @param string $csvEnclosure
    *   The character used to enclose values in the CSV data. Defaults to '"'.
-   * @param string $escape
+   * @param string $csvEscape
    *   The character used to escape special characters in the CSV data.
    *   Defaults to '\\'.
    */
-  public function __construct(string $csvString = NULL, string $separator = ',', string $enclosure = '"', string $escape = '\\') {
-    $this->csvSeparator = $separator;
-    $this->csvEnclosure = $enclosure;
-    $this->csvEscape = $escape;
-
-    if ($csvString) {
-      $this->csvString = $csvString;
-    }
-
+  public function __construct(protected ?string $csvString = NULL,
+                              protected string $csvSeparator = ',',
+                              protected string $csvEnclosure = '"',
+                              protected string $csvEscape = '\\') {
     $this->parse();
   }
 
@@ -172,7 +137,7 @@ class CsvTable {
   public function render(callable|string $renderer = NULL, array $options = []): string {
     $renderer = $renderer
       ? (is_string($renderer) && class_exists($renderer) ? [$renderer, 'render'] : $renderer)
-      : [$this, 'renderCsv'];
+      : $this->renderCsv(...);
 
     if (!is_callable($renderer)) {
       throw new \Exception('Renderer must be callable');
@@ -228,11 +193,11 @@ class CsvTable {
     if ($out) {
       if (count($header) > 0) {
         /* @phpstan-ignore-next-line */
-        fputcsv($out, $header, $options['separator'], $options['enclosure'], $options['escape']);
+        fputcsv($out, $header, (string) $options['separator'], (string) $options['enclosure'], (string) $options['escape']);
       }
       foreach ($rows as $row) {
         /* @phpstan-ignore-next-line */
-        fputcsv($out, $row, $options['separator'], $options['enclosure'], $options['escape']);
+        fputcsv($out, $row, (string) $options['separator'], (string) $options['enclosure'], (string) $options['escape']);
       }
 
       rewind($out);
@@ -263,7 +228,7 @@ class CsvTable {
       $header = '';
     }
 
-    return $header . implode("\n", array_map(function ($row) {
+    return $header . implode("\n", array_map(static function ($row): string {
       return implode('|', $row);
     }, $rows));
   }
