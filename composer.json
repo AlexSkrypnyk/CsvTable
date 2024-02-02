@@ -22,7 +22,7 @@
         "drupal/coder": "^8.3",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.1",
+        "phpunit/phpunit": "^11.0",
         "rector/rector": "^0.19.0"
     },
     "autoload": {
