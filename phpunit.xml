@@ -24,6 +24,9 @@
             <file>CsvTable.php</file>
             <file>Markdown.php</file>
         </include>
+        <exclude>
+            <directory>tests</directory>
+        </exclude>
     </source>
 
     <coverage includeUncoveredFiles="true"
