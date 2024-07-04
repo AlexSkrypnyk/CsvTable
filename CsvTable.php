@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AlexSkrypnyk\CsvTable;
 
@@ -43,10 +43,12 @@ class CsvTable {
    *   The character used to escape special characters in the CSV data.
    *   Defaults to '\\'.
    */
-  public function __construct(protected ?string $csvString = NULL,
-                              protected string $csvSeparator = ',',
-                              protected string $csvEnclosure = '"',
-                              protected string $csvEscape = '\\') {
+  public function __construct(
+    protected ?string $csvString = NULL,
+    protected string $csvSeparator = ',',
+    protected string $csvEnclosure = '"',
+    protected string $csvEscape = '\\',
+  ) {
     $this->parse();
   }
 

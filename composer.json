@@ -16,7 +16,7 @@
         "source": "https://github.com/AlexSkrypnyk/CsvTable"
     },
     "require": {
-        "php": ">=8.1"
+        "php": ">=8.2"
     },
     "require-dev": {
         "drupal/coder": "^8.3",
@@ -43,6 +43,7 @@
             "rector --dry-run"
         ],
         "lint:fix": "phpcbf",
-        "test": "if [ \"${XDEBUG_MODE}\" = 'coverage' ]; then phpunit; else phpunit --no-coverage; fi"
+        "test": "phpunit --no-coverage",
+        "test-coverage": "phpunit"
     }
 }
