@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
  * Unit tests for CsvTable and default renderers.
  *
  * @covers \AlexSkrypnyk\CsvTable\CsvTable
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class CsvTableUnitTest extends TestCase {
 
@@ -33,6 +34,7 @@ class CsvTableUnitTest extends TestCase {
    * Test the default behavior using default renderCsv() renderer.
    *
    * @dataProvider dataProviderDefault
+   * @group wip3
    */
   public function testDefault(string $csv, bool|null $with_header, string $expected): void {
     $table = new CsvTable($csv);
@@ -144,16 +146,15 @@ class CsvTableUnitTest extends TestCase {
     $csv = self::fixtureCsv();
 
     $custom_renderer = static function ($header, $rows): string {
+      $output = '';
+
       if (count($header) > 0) {
-        $header = implode('|', $header);
-        $header = $header . "\n" . str_repeat('=', strlen($header)) . "\n";
-      }
-      else {
-        $header = '';
+        $output = implode('|', $header);
+        $output .= "\n" . str_repeat('=', strlen($output)) . "\n";
       }
 
-      return $header . implode("\n", array_map(static function ($row): string {
-          return implode('|', $row);
+      return $output . implode("\n", array_map(static function ($row): string {
+        return implode('|', $row);
       }, $rows));
     };
 
@@ -212,6 +213,97 @@ class CsvTableUnitTest extends TestCase {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Unable to read the file non-existing-file.csv');
     CsvTable::fromFile('non-existing-file.csv');
+  }
+
+  /**
+   * Test renderMarkdownTable().
+   *
+   * @group wip1
+   */
+  public function testRenderMarkdownTable(): void {
+    $csv = <<< EOD
+    col11a,col12ab,col13abc
+    col21a,"col22ab cde",col23abc
+    col31a,col32ab,"col33abcd"
+    EOD;
+
+    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderMarkdownTable']);
+
+    $this->assertEquals(<<< EOD
+    | col11a | col12ab     | col13abc  |
+    |--------|-------------|-----------|
+    | col21a | col22ab cde | col23abc  |
+    | col31a | col32ab     | col33abcd |
+    
+    EOD, $actual);
+  }
+
+  /**
+   * Test renderMarkdownTable() for multiline.
+   */
+  public function testRenderMarkdownTableMultiline(): void {
+    $csv = <<< EOD
+    col11a,col12ab,col13abc
+    col21a,"col22ab\ncdef",col23abc
+    col31a,col32ab,col33abcd
+    EOD;
+
+    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderMarkdownTable']);
+
+    $this->assertEquals(<<< EOD
+    | col11a | col12ab          | col13abc  |
+    |--------|------------------|-----------|
+    | col21a | col22ab<br/>cdef | col23abc  |
+    | col31a | col32ab          | col33abcd |
+    
+    EOD, $actual);
+  }
+
+  /**
+   * Test renderMarkdownTable() for multiline and no header.
+   */
+  public function testRenderMarkdownTableMultilineNoHeader(): void {
+    $csv = <<< EOD
+    col11a,col12ab,col13abc
+    col21a,"col22ab\ncdef",col23abc
+    col31a,col32ab,col33abcd
+    EOD;
+
+    $actual = (new CsvTable($csv))->withoutHeader()->render([CsvTable::class, 'renderMarkdownTable']);
+
+    $this->assertEquals(<<< EOD
+    | col11a | col12ab          | col13abc  |
+    | col21a | col22ab<br/>cdef | col23abc  |
+    | col31a | col32ab          | col33abcd |
+    
+    EOD, $actual);
+  }
+
+  /**
+   * Test renderMarkdownTable() for custom separators.
+   *
+   * @group wip2
+   */
+  public function testRenderMarkdownTableCustomSeparators(): void {
+    $csv = <<< EOD
+    col11a,col12ab,col13abc
+    col21a,"col22ab cde",col23abc
+    col31a,col32ab,"col33abcd"
+    EOD;
+
+    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderMarkdownTable'], [
+      'column_separator' => '|',
+      'row_separator' => "\n",
+      'header_separator' => '=',
+    ]);
+
+    $this->assertEquals(<<< EOD
+    | col11a | col12ab     | col13abc  |
+    |========|=============|===========|
+    | col21a | col22ab cde | col23abc  |
+    | col31a | col32ab     | col33abcd |
+    
+    EOD, $actual);
   }
 
 }

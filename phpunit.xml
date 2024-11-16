@@ -9,7 +9,7 @@
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
          failOnWarning="true"
-         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
          displayDetailsOnTestsThatTriggerErrors="true"
          displayDetailsOnTestsThatTriggerNotices="true"
 >
@@ -22,7 +22,6 @@
     <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
             <file>CsvTable.php</file>
-            <file>Markdown.php</file>
         </include>
         <exclude>
             <directory>tests</directory>

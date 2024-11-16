@@ -256,8 +256,82 @@ class CsvTable {
     }
 
     return $output . implode($options['row_separator'], array_map(static function ($row) use ($options): string {
-      return implode($options['column_separator'], $row);
+        return implode($options['column_separator'], $row);
     }, $rows));
+  }
+
+  /**
+   * Render as a Markdown table.
+   *
+   * @param array<string> $header
+   *   An array containing the header row.
+   * @param array<array<string>> $rows
+   *   An array containing all non-header rows.
+   * @param array<string,string> $options
+   *   An array of options for the renderer.
+   *
+   * @return string
+   *   The formatted output.
+   */
+  public static function renderMarkdownTable(array $header, array $rows, array $options): string {
+    $output = '';
+
+    $options += [
+      'column_separator' => '|',
+      'row_separator' => "\n",
+      'header_separator' => '-',
+      'value_row_separator' => "<br/>",
+    ];
+
+    $process_value = function (string $value) use ($options): string {
+      return (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value);
+    };
+
+    $create_row = function (array $row, $cols_widths) use ($options): string {
+      $output = array_map(
+        fn($col, $width): string => str_pad($col, $width),
+        $row,
+        $cols_widths
+      );
+
+      return $options['column_separator'] . ' ' . implode(' ' . $options['column_separator'] . ' ', $output)
+        . ' ' . $options['column_separator'] . $options['row_separator'];
+    };
+
+    $create_header_separator = function ($cols_widths) use ($options): string {
+      $output = $options['column_separator'];
+
+      for ($i = 0; $i < count($cols_widths) - 1; $i++) {
+        $output .= str_repeat($options['header_separator'], $cols_widths[$i] + 2);
+        $output .= $options['column_separator'];
+      }
+
+      return $output . str_repeat($options['header_separator'], $cols_widths[count($cols_widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
+    };
+
+    $header = array_map(function ($col) use ($process_value): string {
+      return $process_value($col);
+    }, $header);
+
+    $rows = array_map(function ($row) use ($process_value): array {
+      return array_map(function ($col) use ($process_value): string {
+        return $process_value($col);
+      }, $row);
+    }, $rows);
+
+    // Calculate max column widths based on the header and rows by transposing
+    // the array and getting the max length of each column.
+    $widths = array_map(
+      fn($col): mixed => max(array_map(fn($item): int => strlen($item ?: ''), $col)),
+      array_map(NULL, ...array_merge([$header], $rows))
+    );
+
+    if (count($header) > 0) {
+      $output .= $create_row($header, $widths);
+      $output .= $create_header_separator($widths);
+    }
+
+    return $output . array_reduce($rows, fn($carry, $row): string => $carry . $create_row($row, $widths), '');
   }
 
 }

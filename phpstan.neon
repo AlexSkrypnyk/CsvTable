@@ -9,7 +9,6 @@ parameters:
   paths:
     - tests
     - CsvTable.php
-    - Markdown.php
 
   excludePaths:
     - vendor/*
