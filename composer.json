@@ -1,8 +1,8 @@
 {
     "name": "alexskrypnyk/csvtable",
-    "type": "library",
     "description": "PHP class to work with CSV as a table and export it as Markdown.",
     "license": "GPL-2.0-or-later",
+    "type": "library",
     "authors": [
         {
             "name": "Alex Skrypnyk",
@@ -20,6 +20,7 @@
     },
     "require-dev": {
         "drupal/coder": "^8.3",
+        "ergebnis/composer-normalize": "^2.44",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.1",
@@ -32,7 +33,8 @@
     },
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ergebnis/composer-normalize": true
         }
     },
     "scripts": {
@@ -40,9 +42,13 @@
             "phpcs",
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
             "phpstan",
-            "rector --dry-run"
+            "rector --clear-cache --dry-run"
         ],
-        "lint:fix": "phpcbf",
+        "lint-fix": [
+            "rector --clear-cache",
+            "phpcbf"
+        ],
+        "reset": "rm -Rf vendor vendor-bin composer.lock",
         "test": "phpunit --no-coverage",
         "test-coverage": "phpunit"
     }

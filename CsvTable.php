@@ -136,7 +136,7 @@ class CsvTable {
    * @throws \Exception
    *   When the renderer is not callable.
    */
-  public function render(callable|string $renderer = NULL, array $options = []): string {
+  public function render(callable|string|null $renderer = NULL, array $options = []): string {
     $renderer = $renderer
       ? (is_string($renderer) && class_exists($renderer) ? [$renderer, 'render'] : $renderer)
       : $this->renderCsv(...);
