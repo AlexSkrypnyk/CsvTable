@@ -49,10 +49,10 @@ class MarkdownUnitTest extends TestCase {
     $actual = (new CsvTable($csv))->render(Markdown::class);
 
     $this->assertEquals(<<< EOD
-    | col11a | col12ab           | col13abc  |
-    |--------|-------------------|-----------|
-    | col21a | col22ab<br />cdef | col23abc  |
-    | col31a | col32ab           | col33abcd |
+    | col11a | col12ab          | col13abc  |
+    |--------|------------------|-----------|
+    | col21a | col22ab<br/>cdef | col23abc  |
+    | col31a | col32ab          | col33abcd |
     
     EOD, $actual);
   }
@@ -67,12 +67,37 @@ class MarkdownUnitTest extends TestCase {
     col31a,col32ab,col33abcd
     EOD;
 
-    $actual = (new CsvTable($csv))->noHeader()->render(Markdown::class);
+    $actual = (new CsvTable($csv))->withoutHeader()->render(Markdown::class);
 
     $this->assertEquals(<<< EOD
-    | col11a | col12ab           | col13abc  |
-    | col21a | col22ab<br />cdef | col23abc  |
-    | col31a | col32ab           | col33abcd |
+    | col11a | col12ab          | col13abc  |
+    | col21a | col22ab<br/>cdef | col23abc  |
+    | col31a | col32ab          | col33abcd |
+    
+    EOD, $actual);
+  }
+
+  /**
+   * Test render().
+   */
+  public function testRenderCustomSeparators(): void {
+    $csv = <<< EOD
+    col11a,col12ab,col13abc
+    col21a,"col22ab cde",col23abc
+    col31a,col32ab,"col33abcd"
+    EOD;
+
+    $actual = (new CsvTable($csv))->render(Markdown::class, [
+      'column_separator' => '|',
+      'row_separator' => "\n",
+      'header_separator' => '-',
+    ]);
+
+    $this->assertEquals(<<< EOD
+    | col11a | col12ab     | col13abc  |
+    |--------|-------------|-----------|
+    | col21a | col22ab cde | col23abc  |
+    | col31a | col32ab     | col33abcd |
     
     EOD, $actual);
   }

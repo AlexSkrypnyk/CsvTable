@@ -83,10 +83,10 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Using `CsvTable::renderTextTable()` renderer with disabled header
+### Using `CsvTable::renderTextTable()` renderer without a header
 
 ```php
-print (CsvTable::fromFile($file))->noHeader()->render([CsvTable::class, 'renderTextTable']);
+print (CsvTable::fromFile($file))->withoutHeader()->render([CsvTable::class, 'renderTextTable']);
 ```
 will produce table content:
 ```csv

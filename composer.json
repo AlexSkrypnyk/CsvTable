@@ -40,7 +40,7 @@
     "scripts": {
         "lint": [
             "phpcs",
-            "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
+            "phpmd --exclude vendor,node_modules . text phpmd.xml",
             "phpstan",
             "rector --clear-cache --dry-run"
         ],
@@ -48,7 +48,7 @@
             "rector --clear-cache",
             "phpcbf"
         ],
-        "reset": "rm -Rf vendor vendor-bin composer.lock",
+        "reset": "rm -Rf vendor composer.lock",
         "test": "phpunit --no-coverage",
         "test-coverage": "phpunit"
     }

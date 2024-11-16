@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\CsvTable;
 
 /**
- * Class CsvTable.
+ * Class Markdown.
  *
- * Represents and manipulates CSV data.
+ * Renders CSV data as a Markdown table.
  */
 class Markdown {
 
@@ -26,11 +26,19 @@ class Markdown {
   protected array $rows;
 
   /**
-   * Options.
-   *
-   * @var array<mixed>
+   * Column separator.
    */
-  protected array $options = [];
+  protected string $columnSeparator = '|';
+
+  /**
+   * Row separator.
+   */
+  protected string $rowSeparator = "\n";
+
+  /**
+   * Value row separator.
+   */
+  protected string $valueRowSeparator = '<br/>';
 
   /**
    * Number of columns.
@@ -51,20 +59,30 @@ class Markdown {
    *   The header row.
    * @param array<string[]> $rows
    *   The rows.
-   * @param array<mixed> $options
-   *   Options.
+   * @param array<string,string> $options
+   *   Additional options with keys:
+   *   - column_separator: Column separator.
+   *   - row_separator: Row separator.
+   *   - value_row_separator: Value row separator.
    */
-  public function __construct(array $header, array $rows, array $options = []) {
-    $this->header = array_map([self::class, 'processValue'], $header);
+  final public function __construct(array $header, array $rows, array $options = []) {
+    $this->columnSeparator = $options['column_separator'] ?? $this->columnSeparator;
+    $this->rowSeparator = $options['row_separator'] ?? $this->rowSeparator;
+    $this->valueRowSeparator = $options['value_row_separator'] ?? $this->valueRowSeparator;
 
-    $this->rows = array_map(static function ($row): array {
-      return array_map([self::class, 'processValue'], $row);
+    $this->header = array_map(function ($col): string {
+      return $this->processValue($col);
+    }, $header);
+
+    $this->rows = array_map(function ($row): array {
+      return array_map(function ($col): string {
+        return $this->processValue($col);
+      }, $row);
     }, $rows);
-    $this->options = $options + ['column_separator' => '|'];
 
     // Assume that all rows and the header have the same number of columns.
     $this->colCount = count($this->rows) > 0 ? count($this->rows[0]) : 0;
-    $this->colWidths = $this->getColWidths(array_merge([$this->header], $this->rows));
+    $this->colWidths = $this->calcColWidths(array_merge([$this->header], $this->rows));
   }
 
   /**
@@ -74,15 +92,14 @@ class Markdown {
    *   Header.
    * @param array<string[]> $rows
    *   Rows.
-   * @param array<mixed> $options
+   * @param array<string,string> $options
    *   Options.
    *
    * @return string
    *   Markdown output.
    */
   public static function render(array $header, array $rows, array $options): string {
-    /* @phpstan-ignore-next-line */
-    return (new static($header, $rows, $options))->renderTable();
+    return (new static($header, $rows, $options))->doRender();
   }
 
   /**
@@ -91,7 +108,7 @@ class Markdown {
    * @return string
    *   Markdown table.
    */
-  public function renderTable(): string {
+  public function doRender(): string {
     return count($this->header) > 0
       ? $this->createRow($this->header) . $this->createHeaderSeparator() . $this->createRows($this->rows)
       : $this->createRows($this->rows);
@@ -107,16 +124,16 @@ class Markdown {
    *   Row as string.
    */
   protected function createRow(array $row): string {
-    $output = $this->options['column_separator'] . ' ';
+    $output = $this->columnSeparator . ' ';
 
     for ($i = 0; $i < $this->colCount - 1; ++$i) {
       $output .= str_pad($row[$i], $this->colWidths[$i]);
-      $output .= ' ' . $this->options['column_separator'] . ' ';
+      $output .= ' ' . $this->columnSeparator . ' ';
     }
 
     $output .= str_pad($row[$this->colCount - 1], $this->colWidths[$this->colCount - 1]);
 
-    return $output . (' ' . $this->options['column_separator'] . "\n");
+    return $output . (' ' . $this->columnSeparator . $this->rowSeparator);
   }
 
   /**
@@ -125,19 +142,19 @@ class Markdown {
   protected function createHeaderSeparator(): string {
     $output = '';
 
-    $output .= $this->options['column_separator'];
+    $output .= $this->columnSeparator;
 
     for ($i = 0; $i < $this->colCount - 1; $i++) {
       $output .= str_repeat('-', $this->colWidths[$i] + 2);
-      $output .= $this->options['column_separator'];
+      $output .= $this->columnSeparator;
     }
 
     $last_index = $this->colCount - 1;
     $output .= str_repeat('-', $this->colWidths[$last_index] + 2);
 
-    $output .= $this->options['column_separator'];
+    $output .= $this->columnSeparator;
 
-    return $output . "\n";
+    return $output . $this->rowSeparator;
   }
 
   /**
@@ -162,20 +179,20 @@ class Markdown {
   /**
    * Process value.
    */
-  public static function processValue(string $value): string {
-    return (string) preg_replace('/(\r\n|\n|\r)/', '<br />', $value);
+  protected function processValue(string $value): string {
+    return (string) preg_replace('/(\r\n|\n|\r)/', $this->valueRowSeparator, $value);
   }
 
   /**
-   * Get the maximum width of each column.
+   * Calculate widths for each column.
    *
    * @param array<string[]> $rows
    *   Rows.
    *
    * @return array<int>
-   *   Col Widths.
+   *   Calculated widths for each column.
    */
-  protected function getColWidths(array $rows): array {
+  protected function calcColWidths(array $rows): array {
     $widths = array_fill(0, $this->colCount, 0);
 
     foreach ($rows as $cols) {
