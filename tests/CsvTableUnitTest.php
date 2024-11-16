@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class CsvTableUnitTest.
  *
- * Unit tests for CsvTable and default renderers.
+ * Unit tests for CsvTable and default formatters.
  *
  * @covers \AlexSkrypnyk\CsvTable\CsvTable
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
@@ -31,7 +31,7 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test the default behavior using default renderCsv() renderer.
+   * Test the default behavior using default formatCsv() formatter.
    *
    * @dataProvider dataProviderDefault
    * @group wip3
@@ -49,7 +49,7 @@ class CsvTableUnitTest extends TestCase {
       }
     }
 
-    $actual = $table->render();
+    $actual = $table->format();
 
     $this->assertEquals($expected, $actual);
   }
@@ -103,13 +103,13 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test doRender() renderer.
+   * Test doFormat() formatter.
    */
-  public function testRenderTable(): void {
+  public function testFormatTable(): void {
     $csv = self::fixtureCsv();
 
     $actual = (new CsvTable($csv))
-      ->render([CsvTable::class, 'renderTable']);
+      ->format([CsvTable::class, 'formatTable']);
 
     $this->assertEquals(<<< EOD
     col11|col12|col13
@@ -120,7 +120,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))
       ->withoutHeader()
-      ->render([CsvTable::class, 'renderTable']);
+      ->format([CsvTable::class, 'formatTable']);
     $this->assertEquals(<<< EOD
     col11|col12|col13
     col21|col22|col23
@@ -129,23 +129,23 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test pass not callable to render().
+   * Test pass not callable to format().
    */
-  public function testRenderNotCallable(): void {
+  public function testFormatNotCallable(): void {
     $csv = self::fixtureCsv();
 
     $this->expectException(\Exception::class);
-    $this->expectExceptionMessage('Renderer must be callable.');
-    (new CsvTable($csv))->render('Not callable');
+    $this->expectExceptionMessage('Formatter must be callable.');
+    (new CsvTable($csv))->format('Not callable');
   }
 
   /**
-   * Test using a custom renderer.
+   * Test using a custom formatter.
    */
-  public function testCustomRenderer(): void {
+  public function testCustomFormatter(): void {
     $csv = self::fixtureCsv();
 
-    $custom_renderer = static function ($header, $rows): string {
+    $custom_formatter = static function ($header, $rows): string {
       $output = '';
 
       if (count($header) > 0) {
@@ -158,7 +158,7 @@ class CsvTableUnitTest extends TestCase {
       }, $rows));
     };
 
-    $actual = (new CsvTable($csv))->render($custom_renderer);
+    $actual = (new CsvTable($csv))->format($custom_formatter);
 
     $this->assertEquals(<<< EOD
     col11|col12|col13
@@ -175,12 +175,12 @@ class CsvTableUnitTest extends TestCase {
     $csv = self::fixtureCsv();
     $csv_updated = str_replace(',', ';', self::fixtureCsv());
 
-    // Custom separator for parsing, default for rendering.
-    $actual = (new CsvTable($csv_updated, ';'))->render();
+    // Custom separator for parsing, default for formating.
+    $actual = (new CsvTable($csv_updated, ';'))->format();
     $this->assertEquals($csv, $actual);
 
-    // Custom separator for parsing and rendering.
-    $actual = (new CsvTable($csv_updated, ';'))->render(NULL, ['separator' => ';']);
+    // Custom separator for parsing and formating.
+    $actual = (new CsvTable($csv_updated, ';'))->format(NULL, ['separator' => ';']);
     $this->assertEquals($csv_updated, $actual);
   }
 
@@ -193,7 +193,7 @@ class CsvTableUnitTest extends TestCase {
     col21,"col22\ncol22secondline",col23
 
     EOD;
-    $actual = (new CsvTable($csv))->render();
+    $actual = (new CsvTable($csv))->format();
     $this->assertEquals($csv, $actual);
   }
 
@@ -207,7 +207,7 @@ class CsvTableUnitTest extends TestCase {
     $file = tempnam(sys_get_temp_dir(), 'csv');
     file_put_contents((string) $file, $csv);
 
-    $actual = (CsvTable::fromFile((string) $file))->render();
+    $actual = (CsvTable::fromFile((string) $file))->format();
     $this->assertEquals($csv, $actual);
 
     $this->expectException(\Exception::class);
@@ -216,18 +216,18 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test renderMarkdownTable().
+   * Test formatMarkdownTable().
    *
    * @group wip1
    */
-  public function testRenderMarkdownTable(): void {
+  public function testFormatMarkdownTable(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab cde",col23abc
     col31a,col32ab,"col33abcd"
     EOD;
 
-    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderMarkdownTable']);
+    $actual = (new CsvTable($csv))->format([CsvTable::class, 'formatMarkdownTable']);
 
     $this->assertEquals(<<< EOD
     | col11a | col12ab     | col13abc  |
@@ -239,16 +239,16 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test renderMarkdownTable() for multiline.
+   * Test formatMarkdownTable() for multiline.
    */
-  public function testRenderMarkdownTableMultiline(): void {
+  public function testFormatMarkdownTableMultiline(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab\ncdef",col23abc
     col31a,col32ab,col33abcd
     EOD;
 
-    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderMarkdownTable']);
+    $actual = (new CsvTable($csv))->format([CsvTable::class, 'formatMarkdownTable']);
 
     $this->assertEquals(<<< EOD
     | col11a | col12ab          | col13abc  |
@@ -260,16 +260,16 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test renderMarkdownTable() for multiline and no header.
+   * Test formatMarkdownTable() for multiline and no header.
    */
-  public function testRenderMarkdownTableMultilineNoHeader(): void {
+  public function testFormatMarkdownTableMultilineNoHeader(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab\ncdef",col23abc
     col31a,col32ab,col33abcd
     EOD;
 
-    $actual = (new CsvTable($csv))->withoutHeader()->render([CsvTable::class, 'renderMarkdownTable']);
+    $actual = (new CsvTable($csv))->withoutHeader()->format([CsvTable::class, 'formatMarkdownTable']);
 
     $this->assertEquals(<<< EOD
     | col11a | col12ab          | col13abc  |
@@ -280,18 +280,18 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test renderMarkdownTable() for custom separators.
+   * Test formatMarkdownTable() for custom separators.
    *
    * @group wip2
    */
-  public function testRenderMarkdownTableCustomSeparators(): void {
+  public function testFormatMarkdownTableCustomSeparators(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
     col21a,"col22ab cde",col23abc
     col31a,col32ab,"col33abcd"
     EOD;
 
-    $actual = (new CsvTable($csv))->render([CsvTable::class, 'renderMarkdownTable'], [
+    $actual = (new CsvTable($csv))->format([CsvTable::class, 'formatMarkdownTable'], [
       'column_separator' => '|',
       'row_separator' => "\n",
       'header_separator' => '=',
