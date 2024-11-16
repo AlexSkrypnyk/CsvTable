@@ -34,15 +34,16 @@ class CsvTableUnitTest extends TestCase {
    *
    * @dataProvider dataProviderDefault
    */
-  public function testDefault(string $csv, bool|null $hasHeader, string $expected): void {
+  public function testDefault(string $csv, bool|null $with_header, string $expected): void {
     $table = new CsvTable($csv);
 
-    if (!is_null($hasHeader)) {
-      if ($hasHeader) {
-        $table->hasHeader();
+    // Allows to assert default behavior.
+    if (!is_null($with_header)) {
+      if ($with_header) {
+        $table->withHeader();
       }
       else {
-        $table->noHeader();
+        $table->withoutHeader();
       }
     }
 
@@ -79,6 +80,7 @@ class CsvTableUnitTest extends TestCase {
     $csv = self::fixtureCsv();
 
     $table = new CsvTable($csv);
+    $table->parse();
 
     $this->assertEquals(['col11', 'col12', 'col13'], $table->getHeader());
     $this->assertEquals([
@@ -87,7 +89,8 @@ class CsvTableUnitTest extends TestCase {
     ], $table->getRows());
 
     $table = new CsvTable($csv);
-    $table->noHeader();
+    $table->withoutHeader();
+    $table->parse();
 
     $this->assertEquals([], $table->getHeader());
     $this->assertEquals([
@@ -98,13 +101,13 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
-   * Test renderTable() renderer.
+   * Test doRender() renderer.
    */
   public function testRenderTable(): void {
     $csv = self::fixtureCsv();
-    // With header.
+
     $actual = (new CsvTable($csv))
-      ->render(CsvTable::renderTable(...));
+      ->render([CsvTable::class, 'renderTable']);
 
     $this->assertEquals(<<< EOD
     col11|col12|col13
@@ -113,10 +116,9 @@ class CsvTableUnitTest extends TestCase {
     col31|col32|col33
     EOD, $actual);
 
-    // No header.
     $actual = (new CsvTable($csv))
-      ->noHeader()
-      ->render(CsvTable::renderTable(...));
+      ->withoutHeader()
+      ->render([CsvTable::class, 'renderTable']);
     $this->assertEquals(<<< EOD
     col11|col12|col13
     col21|col22|col23
@@ -131,14 +133,14 @@ class CsvTableUnitTest extends TestCase {
     $csv = self::fixtureCsv();
 
     $this->expectException(\Exception::class);
-    (new CsvTable($csv))
-      ->render('Not callable');
+    $this->expectExceptionMessage('Renderer must be callable.');
+    (new CsvTable($csv))->render('Not callable');
   }
 
   /**
-   * Test using a custom formatter.
+   * Test using a custom renderer.
    */
-  public function testAnotherFormatter(): void {
+  public function testCustomRenderer(): void {
     $csv = self::fixtureCsv();
 
     $custom_renderer = static function ($header, $rows): string {
@@ -151,7 +153,7 @@ class CsvTableUnitTest extends TestCase {
       }
 
       return $header . implode("\n", array_map(static function ($row): string {
-        return implode('|', $row);
+          return implode('|', $row);
       }, $rows));
     };
 
@@ -169,10 +171,16 @@ class CsvTableUnitTest extends TestCase {
    * Test custom CSV separator.
    */
   public function testCustomCsvSeparator(): void {
-    $csv = str_replace(',', ';', self::fixtureCsv());
-    $actual = (new CsvTable($csv, ';'))
-      ->render();
+    $csv = self::fixtureCsv();
+    $csv_updated = str_replace(',', ';', self::fixtureCsv());
+
+    // Custom separator for parsing, default for rendering.
+    $actual = (new CsvTable($csv_updated, ';'))->render();
     $this->assertEquals($csv, $actual);
+
+    // Custom separator for parsing and rendering.
+    $actual = (new CsvTable($csv_updated, ';'))->render(NULL, ['separator' => ';']);
+    $this->assertEquals($csv_updated, $actual);
   }
 
   /**
@@ -184,8 +192,7 @@ class CsvTableUnitTest extends TestCase {
     col21,"col22\ncol22secondline",col23
 
     EOD;
-    $actual = (new CsvTable($csv))
-      ->render();
+    $actual = (new CsvTable($csv))->render();
     $this->assertEquals($csv, $actual);
   }
 
@@ -198,10 +205,12 @@ class CsvTableUnitTest extends TestCase {
     $csv = self::fixtureCsv();
     $file = tempnam(sys_get_temp_dir(), 'csv');
     file_put_contents((string) $file, $csv);
+
     $actual = (CsvTable::fromFile((string) $file))->render();
     $this->assertEquals($csv, $actual);
 
     $this->expectException(\Exception::class);
+    $this->expectExceptionMessage('Unable to read the file non-existing-file.csv');
     CsvTable::fromFile('non-existing-file.csv');
   }
 
