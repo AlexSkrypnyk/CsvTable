@@ -7,12 +7,13 @@ namespace AlexSkrypnyk\CsvTable;
 /**
  * Class CsvTable.
  *
- * Manipulates CSV data and renders it in various formats.
+ * Manipulates CSV data and outputs it in various formats.
  * Implemented as a single class for portability.
  *
- * By default, the CSV data is parsed with a header row and rendered as a table.
+ * By default, the CSV data is parsed with a header row and formated as a table.
  *
- * Custom renderers can be used to render the CSV data in different formats.
+ * A custom formatter allows the parsed CSV data to be output in an alternative
+ * format.
  */
 class CsvTable {
 
@@ -159,48 +160,48 @@ class CsvTable {
   }
 
   /**
-   * Render the CSV data.
+   * Format the CSV data.
    *
-   * @param callable|string|null $renderer
-   *   A callable to renderer the output. Can be a function name, a class name,
+   * @param callable|string|null $formatter
+   *   A callable to formatter the output. Can be a function name, a class name,
    *   a closure, or an array containing a class name and a method name. If NULL
-   *   is provided, the default renderer will be used.
+   *   is provided, the default formatter will be used.
    * @param array<mixed> $options
-   *   An array of options to pass to the renderer. Defaults to an empty array.
+   *   An array of options to pass to the formatter. Defaults to an empty array.
    *
    * @return string
-   *   The rendered output.
+   *   The formated output.
    *
    * @throws \Exception
-   *   When the renderer is not callable.
+   *   When the formatter is not callable.
    */
-  public function render(callable|string|null $renderer = NULL, array $options = []): string {
-    $renderer = $renderer ?? [static::class, 'renderCsv'];
-    $renderer = is_string($renderer) && class_exists($renderer) ? [$renderer, 'render'] : $renderer;
+  public function format(callable|string|null $formatter = NULL, array $options = []): string {
+    $formatter = $formatter ?? [static::class, 'formatCsv'];
+    $formatter = is_string($formatter) && class_exists($formatter) ? [$formatter, 'format'] : $formatter;
 
-    if (!is_callable($renderer)) {
-      throw new \Exception('Renderer must be callable.');
+    if (!is_callable($formatter)) {
+      throw new \Exception('Formatter must be callable.');
     }
 
     $this->parse();
 
-    return call_user_func($renderer, $this->header, $this->rows, $options);
+    return call_user_func($formatter, $this->header, $this->rows, $options);
   }
 
   /**
-   * Render as CSV.
+   * Format as CSV.
    *
    * @param array<string> $header
    *   An array containing the header row.
    * @param array<array<string>> $rows
    *   An array containing all non-header rows.
    * @param array<string,string> $options
-   *   An array of options for the renderer.
+   *   An array of options for the formatter.
    *
    * @return string
    *   The formatted output.
    */
-  public static function renderCsv(array $header, array $rows, array $options): string {
+  public static function formatCsv(array $header, array $rows, array $options): string {
     $options += [
       'separator' => ',',
       'enclosure' => '"',
@@ -230,19 +231,19 @@ class CsvTable {
   }
 
   /**
-   * Render as a table.
+   * Format as a table.
    *
    * @param array<string> $header
    *   An array containing the header row.
    * @param array<array<string>> $rows
    *   An array containing all non-header rows.
    * @param array<string,string> $options
-   *   An array of options for the renderer.
+   *   An array of options for the formatter.
    *
    * @return string
    *   The formatted output.
    */
-  public static function renderTable(array $header, array $rows, array $options): string {
+  public static function formatTable(array $header, array $rows, array $options): string {
     $output = '';
 
     $options += [
@@ -261,19 +262,19 @@ class CsvTable {
   }
 
   /**
-   * Render as a Markdown table.
+   * Format as a Markdown table.
    *
    * @param array<string> $header
    *   An array containing the header row.
    * @param array<array<string>> $rows
    *   An array containing all non-header rows.
    * @param array<string,string> $options
-   *   An array of options for the renderer.
+   *   An array of options for the formatter.
    *
    * @return string
    *   The formatted output.
    */
-  public static function renderMarkdownTable(array $header, array $rows, array $options): string {
+  public static function formatMarkdownTable(array $header, array $rows, array $options): string {
     $output = '';
 
     $options += [

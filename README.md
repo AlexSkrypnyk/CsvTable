@@ -3,7 +3,7 @@
   <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=CsvTable&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="Yourproject logo"></a>
 </p>
 
-<h1 align="center">CsvTable</h1>
+<h1 align="center">PHP class to parse and format CSV content</h1>
 
 <div align="center">
 
@@ -19,15 +19,11 @@
 
 ---
 
-<p align="center"> PHP class to work with CSV as a table and export it as Markdown.
-    <br>
-</p>
-
 ## Features
 
 - Single-file class to manipulate CSV table.
-- Renderers for CSV, text table and Markdown table.
-- Support for a custom renderer.
+- Formatters for CSV, text table and Markdown table.
+- Support for a custom formatter.
 
 ## Installation
 
@@ -48,8 +44,8 @@ col31,col32,col33
 
 ```php
 $csv = file_get_contents($csv_file);
-// Render using the default renderer.
-print (new CsvTable($csv))->render();
+// Format using the default formatter.
+print (new CsvTable($csv))->format();
 ```
 will produce identical CSV content by default:
 ```csv
@@ -61,7 +57,7 @@ col31,col32,col33
 ### From file
 
 ```php
-print (CsvTable::fromFile($file))->render();
+print (CsvTable::fromFile($file))->format();
 ```
 will produce identical CSV content by default:
 ```csv
@@ -70,10 +66,10 @@ col21,col22,col23
 col31,col32,col33
 ```
 
-### Using `CsvTable::renderTextTable()` renderer
+### Using `CsvTable::formatTextTable()` formatter
 
 ```php
-print (CsvTable::fromFile($file))->render([CsvTable::class, 'renderTextTable']);
+print (CsvTable::fromFile($file))->format([CsvTable::class, 'formatTextTable']);
 ```
 will produce table content:
 ```csv
@@ -83,10 +79,10 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Using `CsvTable::renderTextTable()` renderer without a header
+### Using `CsvTable::formatTextTable()` formatter without a header
 
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->render([CsvTable::class, 'renderTextTable']);
+print (CsvTable::fromFile($file))->withoutHeader()->format([CsvTable::class, 'formatTextTable']);
 ```
 will produce table content:
 ```csv
@@ -95,10 +91,10 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Using `CsvTable::renderMarkdownTable()` renderer
+### Using `CsvTable::formatMarkdownTable()` formatter
 
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->render([CsvTable::class, 'renderMarkdownTable']);
+print (CsvTable::fromFile($file))->withoutHeader()->format([CsvTable::class, 'formatMarkdownTable']);
 ```
 will produce Markdown table:
 ```markdown
@@ -108,10 +104,10 @@ will produce Markdown table:
 | col31 | col32 | col33 |     
 ```
 
-### Custom renderer as a callback
+### Custom formatter as a callback
 
 ```php
-print (CsvTable::fromFile($file))->render(function ($header, $rows, $options) {
+print (CsvTable::fromFile($file))->format(function ($header, $rows, $options) {
   $output = '';
 
   if (count($header) > 0) {
