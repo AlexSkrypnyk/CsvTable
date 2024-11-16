@@ -66,10 +66,10 @@ col21,col22,col23
 col31,col32,col33
 ```
 
-### Using `CsvTable::formatTextTable()` formatter
+### Using `text_table` formatter
 
 ```php
-print (CsvTable::fromFile($file))->format([CsvTable::class, 'formatTextTable']);
+print (CsvTable::fromFile($file))->format('text_table');
 ```
 will produce table content:
 ```csv
@@ -79,10 +79,10 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Using `CsvTable::formatTextTable()` formatter without a header
+### Using `text_table` formatter without a header
 
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->format([CsvTable::class, 'formatTextTable']);
+print (CsvTable::fromFile($file))->withoutHeader()->format('text_table');
 ```
 will produce table content:
 ```csv
@@ -91,10 +91,10 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Using `CsvTable::formatMarkdownTable()` formatter
+### Using `markdown_table` formatter
 
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->format([CsvTable::class, 'formatMarkdownTable']);
+print (CsvTable::fromFile($file))->withoutHeader()->format('markdown_table');
 ```
 will produce Markdown table:
 ```markdown
@@ -104,7 +104,7 @@ will produce Markdown table:
 | col31 | col32 | col33 |     
 ```
 
-### Custom formatter as a callback
+### Custom formatter as an anonymous callback
 
 ```php
 print (CsvTable::fromFile($file))->format(function ($header, $rows, $options) {
@@ -126,6 +126,19 @@ col11|col12|col13
 =================
 col21|col22|col23
 col31|col32|col33     
+```
+
+### Custom formatter as a class with default `format` method
+
+```php
+print (CsvTable::fromFile($file))->withoutHeader()->format(CustomFormatter::class);
+```
+
+### Custom formatter as a class with a custom method and options
+
+```php
+$formatter_options = ['option1' => 'value1', 'option2' => 'value2'];
+print (CsvTable::fromFile($file))->withoutHeader()->format([CustomFormatter::class, 'customFormat'], $formatter_options);
 ```
 
 ## Maintenance
