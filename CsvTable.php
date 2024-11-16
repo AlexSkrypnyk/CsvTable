@@ -162,10 +162,11 @@ class CsvTable {
   /**
    * Format the CSV data.
    *
-   * @param callable|string|null $formatter
-   *   A callable to formatter the output. Can be a function name, a class name,
-   *   a closure, or an array containing a class name and a method name. If NULL
-   *   is provided, the default formatter will be used.
+   * @param string|array<int, string>|callable|null $formatter
+   *   Formatter to use. Can be a function name, a class name, a closure, an
+   *   array containing a class name and a method name, or a predefined
+   *   formatter available as format<Name> method. If NULL is provided, the
+   *   'CSV" formatter will be used.
    * @param array<mixed> $options
    *   An array of options to pass to the formatter. Defaults to an empty array.
    *
@@ -175,9 +176,18 @@ class CsvTable {
    * @throws \Exception
    *   When the formatter is not callable.
    */
-  public function format(callable|string|null $formatter = NULL, array $options = []): string {
-    $formatter = $formatter ?? [static::class, 'formatCsv'];
-    $formatter = is_string($formatter) && class_exists($formatter) ? [$formatter, 'format'] : $formatter;
+  public function format(string|array|callable|null $formatter = NULL, array $options = []): string {
+    $formatter = $formatter ?? 'csv';
+
+    if (is_string($formatter) && !function_exists($formatter)) {
+      if (class_exists($formatter)) {
+        $formatter = [$formatter, 'format'];
+      }
+      else {
+        $method = 'format' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', strtolower($formatter))));
+        $formatter = method_exists($this, $method) ? [$this, $method] : NULL;
+      }
+    }
 
     if (!is_callable($formatter)) {
       throw new \Exception('Formatter must be callable.');
