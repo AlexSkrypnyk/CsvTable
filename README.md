@@ -26,8 +26,8 @@
 ## Features
 
 - Single-file class to manipulate CSV table.
-- Renderers for CSV and text table.
-- Ability to provide custom renderer.
+- Renderers for CSV, text table and Markdown table.
+- Support for a custom renderer.
 
 ## Installation
 
@@ -95,12 +95,12 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Custom renderer from class
+### Using `CsvTable::renderMarkdownTable()` renderer
 
 ```php
-print (CsvTable::fromFile($file))->render(Markdown::class);
+print (CsvTable::fromFile($file))->withoutHeader()->render([CsvTable::class, 'renderMarkdownTable']);
 ```
-will produce Markdown content:
+will produce Markdown table:
 ```markdown
 | col11 | col12 | col13 |
 |-------|-------|-------|
@@ -112,15 +112,14 @@ will produce Markdown content:
 
 ```php
 print (CsvTable::fromFile($file))->render(function ($header, $rows, $options) {
+  $output = '';
+
   if (count($header) > 0) {
-    $header = implode('|', $header);
-    $header = $header . "\n" . str_repeat('-', strlen($header)) . "\n";
-  }
-  else {
-    $header = '';
+    $output = implode('|', $header);
+    $output .= "\n" . str_repeat('=', strlen($output)) . "\n";
   }
 
-  return $header . implode("\n", array_map(function ($row) {
+  return $output . implode("\n", array_map(static function ($row): string {
     return implode('|', $row);
   }, $rows));
 });
@@ -128,7 +127,7 @@ print (CsvTable::fromFile($file))->render(function ($header, $rows, $options) {
 will produce CSV content:
 ```csv
 col11|col12|col13
------------------
+=================
 col21|col22|col23
 col31|col32|col33     
 ```

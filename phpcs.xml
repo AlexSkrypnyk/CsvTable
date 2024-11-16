@@ -14,7 +14,6 @@
     <arg name="colors"/>
 
     <file>CsvTable.php</file>
-    <file>Markdown.php</file>
     <file>tests</file>
 
     <!-- Allow long array lines in tests. -->
