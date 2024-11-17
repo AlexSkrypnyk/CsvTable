@@ -94,7 +94,7 @@ col31|col32|col33
 ### Using `markdown_table` formatter
 
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->format('markdown_table');
+print (CsvTable::fromFile($file))->format('markdown_table');
 ```
 will produce Markdown table:
 ```markdown
