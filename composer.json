@@ -22,7 +22,7 @@
         "drupal/coder": "^8.3",
         "ergebnis/composer-normalize": "^2.44",
         "phpstan/phpstan": "^2",
-        "phpunit/phpunit": "^10.1",
+        "phpunit/phpunit": "^11",
         "rector/rector": "^2"
     },
     "autoload": {
@@ -32,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "AlexSkrypnyk\\CsvTable\\Tests\\": "tests"
+            "AlexSkrypnyk\\CsvTable\\Tests\\": "tests/phpunit"
         }
     },
     "config": {
