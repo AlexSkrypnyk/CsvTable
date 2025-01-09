@@ -1,6 +1,6 @@
 {
     "name": "alexskrypnyk/csvtable",
-    "description": "PHP class to work with CSV as a table and export it as Markdown.",
+    "description": "PHP class to parse and format CSV content.",
     "license": "GPL-2.0-or-later",
     "type": "library",
     "authors": [
@@ -21,10 +21,9 @@
     "require-dev": {
         "drupal/coder": "^8.3",
         "ergebnis/composer-normalize": "^2.44",
-        "phpmd/phpmd": "^2.15",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^2",
         "phpunit/phpunit": "^10.1",
-        "rector/rector": "^1.0.0"
+        "rector/rector": "^2"
     },
     "autoload": {
         "psr-4": {
@@ -45,7 +44,6 @@
     "scripts": {
         "lint": [
             "phpcs",
-            "phpmd --exclude vendor,node_modules . text phpmd.xml",
             "phpstan",
             "rector --clear-cache --dry-run"
         ],
