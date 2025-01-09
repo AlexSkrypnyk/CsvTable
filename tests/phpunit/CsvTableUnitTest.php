@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\CsvTable\Tests;
 
 use AlexSkrypnyk\CsvTable\CsvTable;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class CsvTableUnitTest.
  *
  * Unit tests for CsvTable and default formatters.
- *
- * @covers \AlexSkrypnyk\CsvTable\CsvTable
  */
+#[CoversClass(CsvTable::class)]
 class CsvTableUnitTest extends TestCase {
 
   /**
@@ -33,9 +34,6 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test getters.
-   *
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::getRows
-   * @covers \AlexSkrypnyk\CsvTable\CsvTable::getHeader
    */
   public function testGetters(): void {
     $csv = self::fixtureCsv();
@@ -79,9 +77,8 @@ class CsvTableUnitTest extends TestCase {
 
   /**
    * Test the default behavior using default formatCsv() formatter.
-   *
-   * @dataProvider dataProviderFormatterDefault
    */
+  #[DataProvider('dataProviderFormatterDefault')]
   public function testFormatterDefault(string $csv, bool|null $with_header, string $expected): void {
     $table = new CsvTable($csv);
 
