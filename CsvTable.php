@@ -120,8 +120,19 @@ class CsvTable {
     }
     fclose($stream);
 
-    $this->header = $this->shouldParseHeader && count($rows) > 0 ? array_slice($rows, 0, 1)[0] : [];
-    $this->rows = $this->shouldParseHeader && count($rows) > 0 ? array_slice($rows, 1) : $rows;
+    $this->header = $this->shouldParseHeader && count($rows) > 0
+      ? array_map(fn($value): string => $value ?? '', array_slice($rows, 0, 1)[0])
+      : [];
+
+    $this->rows = $this->shouldParseHeader && count($rows) > 0
+      ? array_map(
+        fn($row) => array_map(fn($value): string => $value ?? '', $row),
+        array_slice($rows, 1)
+      )
+      : array_map(
+        fn($row) => array_map(fn($value): string => $value ?? '', $row),
+        $rows
+      );
   }
 
   /**
@@ -333,7 +344,7 @@ class CsvTable {
     // Calculate max column widths based on the header and rows by transposing
     // the array and getting the max length of each column.
     $widths = array_map(
-      fn($col): mixed => max(array_map(fn($item): int => strlen($item ?: ''), $col)),
+      fn($col): int => max(array_map(fn($item): int => strlen($item ?: ''), $col) ?: [0]),
       array_map(NULL, ...array_merge([$header], $rows))
     );
 

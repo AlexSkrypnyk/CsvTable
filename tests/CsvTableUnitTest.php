@@ -13,7 +13,6 @@ use PHPUnit\Framework\TestCase;
  * Unit tests for CsvTable and default formatters.
  *
  * @covers \AlexSkrypnyk\CsvTable\CsvTable
- * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class CsvTableUnitTest extends TestCase {
 
