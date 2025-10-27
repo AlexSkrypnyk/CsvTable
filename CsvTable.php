@@ -126,11 +126,11 @@ class CsvTable {
 
     $this->rows = $this->shouldParseHeader && count($rows) > 0
       ? array_map(
-        fn($row) => array_map(fn($value): string => $value ?? '', $row),
+        fn($row): array => array_map(fn($value): string => $value ?? '', $row),
         array_slice($rows, 1)
       )
       : array_map(
-        fn($row) => array_map(fn($value): string => $value ?? '', $row),
+        fn($row): array => array_map(fn($value): string => $value ?? '', $row),
         $rows
       );
   }
@@ -277,7 +277,7 @@ class CsvTable {
       $output .= str_repeat('-', strlen($output) - strlen($options['row_separator'])) . $options['row_separator'];
     }
 
-    return $output . implode($options['row_separator'], array_map(static function ($row) use ($options): string {
+    return $output . implode($options['row_separator'], array_map(static function (array $row) use ($options): string {
         return implode($options['column_separator'], $row);
     }, $rows));
   }
@@ -310,6 +310,9 @@ class CsvTable {
     };
 
     $create_row = function (array $row, $cols_widths) use ($options): string {
+      // Pad row with empty strings to match the number of columns.
+      $row = array_pad($row, count($cols_widths), '');
+
       $output = array_map(
         fn($col, $width): string => str_pad($col, $width),
         $row,
@@ -331,22 +334,35 @@ class CsvTable {
       return $output . str_repeat($options['header_separator'], $cols_widths[count($cols_widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
     };
 
-    $header = array_map(function ($col) use ($process_value): string {
+    $header = array_map(function (string $col) use ($process_value): string {
       return $process_value($col);
     }, $header);
 
-    $rows = array_map(function ($row) use ($process_value): array {
-      return array_map(function ($col) use ($process_value): string {
+    $rows = array_map(function (array $row) use ($process_value): array {
+      return array_map(function (string $col) use ($process_value): string {
         return $process_value($col);
       }, $row);
     }, $rows);
 
-    // Calculate max column widths based on the header and rows by transposing
-    // the array and getting the max length of each column.
-    $widths = array_map(
-      fn($col): int => max(array_map(fn($item): int => strlen($item ?: ''), $col) ?: [0]),
-      array_map(NULL, ...array_merge([$header], $rows))
-    );
+    // Calculate max column widths for each column.
+    $all_rows = count($header) > 0 ? array_merge([$header], $rows) : $rows;
+    $widths = [];
+
+    if (count($all_rows) > 0) {
+      // Find the maximum number of columns across all rows.
+      $max_columns = max(array_map(fn(array $row): int => count($row), $all_rows));
+
+      // Calculate width for each column.
+      for ($i = 0; $i < $max_columns; $i++) {
+        $max_width = 0;
+        foreach ($all_rows as $row) {
+          if (isset($row[$i])) {
+            $max_width = max($max_width, strlen($row[$i]));
+          }
+        }
+        $widths[] = $max_width;
+      }
+    }
 
     if (count($header) > 0) {
       $output .= $create_row($header, $widths);

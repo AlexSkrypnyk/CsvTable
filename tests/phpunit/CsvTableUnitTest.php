@@ -255,6 +255,72 @@ class CsvTableUnitTest extends TestCase {
   }
 
   /**
+   * Test Markdown table formatter with empty CSV and no header.
+   */
+  public function testFormatterMarkdownTableEmptyNoHeader(): void {
+    $csv = '';
+
+    $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
+
+    $this->assertEquals('', $actual);
+  }
+
+  /**
+   * Test Markdown table formatter with single row and no header.
+   */
+  public function testFormatterMarkdownTableSingleRowNoHeader(): void {
+    $csv = 'col11,col12,col13';
+
+    $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
+
+    $this->assertEquals(<<< EOD
+    | col11 | col12 | col13 |
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test Markdown table formatter with varying column counts.
+   */
+  public function testFormatterMarkdownTableVaryingColumns(): void {
+    $csv = <<< EOD
+    col11,col12,col13
+    col21,col22
+    col31,col32,col33,col34
+    EOD;
+
+    $actual = (new CsvTable($csv))->format('markdown_table');
+
+    $this->assertEquals(<<< EOD
+    | col11 | col12 | col13 |       |
+    |-------|-------|-------|-------|
+    | col21 | col22 |       |       |
+    | col31 | col32 | col33 | col34 |
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test Markdown table formatter with varying column counts and no header.
+   */
+  public function testFormatterMarkdownTableVaryingColumnsNoHeader(): void {
+    $csv = <<< EOD
+    col11,col12,col13
+    col21,col22
+    col31,col32,col33,col34
+    EOD;
+
+    $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
+
+    $this->assertEquals(<<< EOD
+    | col11 | col12 | col13 |       |
+    | col21 | col22 |       |       |
+    | col31 | col32 | col33 | col34 |
+
+    EOD, $actual);
+  }
+
+  /**
    * Test pass not callable to format().
    */
   public function testFormatterCustomNotCallable(): void {
