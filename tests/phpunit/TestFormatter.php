@@ -34,9 +34,7 @@ class TestFormatter {
       $output .= "\n" . str_repeat('=', strlen($output)) . "\n";
     }
 
-    return $output . implode("\n", array_map(static function (array $row) use ($options): string {
-        return implode($options['delimiter'], $row);
-    }, $rows));
+    return $output . implode("\n", array_map(static fn(array $row): string => implode($options['delimiter'], $row), $rows));
   }
 
   /**

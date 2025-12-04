@@ -188,7 +188,7 @@ class CsvTable {
    *   When the formatter is not callable.
    */
   public function format(string|array|callable|null $formatter = NULL, array $options = []): string {
-    $formatter = $formatter ?? 'csv';
+    $formatter ??= 'csv';
 
     if (is_string($formatter) && !function_exists($formatter)) {
       if (class_exists($formatter)) {
@@ -277,9 +277,7 @@ class CsvTable {
       $output .= str_repeat('-', strlen($output) - strlen($options['row_separator'])) . $options['row_separator'];
     }
 
-    return $output . implode($options['row_separator'], array_map(static function (array $row) use ($options): string {
-        return implode($options['column_separator'], $row);
-    }, $rows));
+    return $output . implode($options['row_separator'], array_map(static fn(array $row): string => implode($options['column_separator'], $row), $rows));
   }
 
   /**
@@ -305,16 +303,14 @@ class CsvTable {
       'value_row_separator' => "<br/>",
     ];
 
-    $process_value = function (string $value) use ($options): string {
-      return (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value);
-    };
+    $process_value = (fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value));
 
     $create_row = function (array $row, $cols_widths) use ($options): string {
       // Pad row with empty strings to match the number of columns.
       $row = array_pad($row, count($cols_widths), '');
 
       $output = array_map(
-        fn($col, $width): string => str_pad($col, $width),
+        str_pad(...),
         $row,
         $cols_widths
       );
@@ -334,15 +330,9 @@ class CsvTable {
       return $output . str_repeat($options['header_separator'], $cols_widths[count($cols_widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
     };
 
-    $header = array_map(function (string $col) use ($process_value): string {
-      return $process_value($col);
-    }, $header);
+    $header = array_map(fn(string $col): string => $process_value($col), $header);
 
-    $rows = array_map(function (array $row) use ($process_value): array {
-      return array_map(function (string $col) use ($process_value): string {
-        return $process_value($col);
-      }, $row);
-    }, $rows);
+    $rows = array_map(fn(array $row): array => array_map(fn(string $col): string => $process_value($col), $row), $rows);
 
     // Calculate max column widths for each column.
     $all_rows = count($header) > 0 ? array_merge([$header], $rows) : $rows;
@@ -350,7 +340,7 @@ class CsvTable {
 
     if (count($all_rows) > 0) {
       // Find the maximum number of columns across all rows.
-      $max_columns = max(array_map(fn(array $row): int => count($row), $all_rows));
+      $max_columns = max(array_map(count(...), $all_rows));
 
       // Calculate width for each column.
       for ($i = 0; $i < $max_columns; $i++) {
