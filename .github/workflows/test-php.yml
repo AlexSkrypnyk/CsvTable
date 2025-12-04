@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ['8.3', '8.4', '8.5']
+        php-versions: ['8.2', '8.3', '8.4', '8.5']
 
     steps:
       - name: Checkout code
@@ -40,6 +40,10 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           coverage: pcov
           ini-values: pcov.directory=.
+
+      - name: Downgrade PHPUnit for PHP 8.2
+        if: matrix.php-versions == '8.2'
+        run: composer require phpunit/phpunit:^11 --dev --no-update --no-interaction --no-progress
 
       - name: Install dependencies
         run: composer install
