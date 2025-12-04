@@ -24,6 +24,7 @@
 - Single-file class to manipulate CSV table.
 - Formatters for CSV, text table and Markdown table.
 - Support for a custom formatter.
+- Column manipulation: reorder, filter, and exclude columns.
 
 ## Installation
 
@@ -139,6 +140,109 @@ print (CsvTable::fromFile($file))->withoutHeader()->format(CustomFormatter::clas
 ```php
 $formatter_options = ['option1' => 'value1', 'option2' => 'value2'];
 print (CsvTable::fromFile($file))->withoutHeader()->format([CustomFormatter::class, 'customFormat'], $formatter_options);
+```
+
+## Column Manipulation
+
+Given a CSV file with the following content:
+```csv
+Name,Age,City,Country
+John,30,New York,USA
+Jane,25,London,UK
+```
+
+### Reorder columns with `columnOrder()`
+
+Reorder columns by specifying the desired order. Columns not specified are
+appended in their original order.
+
+```php
+print (CsvTable::fromFile($file))->columnOrder(['City', 'Name'])->format('markdown_table');
+```
+will produce:
+```markdown
+| City     | Name | Age | Country |
+|----------|------|-----|---------|
+| New York | John | 30  | USA     |
+| London   | Jane | 25  | UK      |
+```
+
+### Filter to specific columns with `onlyColumns()`
+
+Keep only the specified columns in the output.
+
+```php
+print (CsvTable::fromFile($file))->onlyColumns(['Name', 'City'])->format('markdown_table');
+```
+will produce:
+```markdown
+| Name | City     |
+|------|----------|
+| John | New York |
+| Jane | London   |
+```
+
+### Exclude columns with `withoutColumns()`
+
+Exclude specified columns from the output.
+
+```php
+print (CsvTable::fromFile($file))->withoutColumns(['Age', 'Country'])->format('markdown_table');
+```
+will produce:
+```markdown
+| Name | City     |
+|------|----------|
+| John | New York |
+| Jane | London   |
+```
+
+### Using column indices
+
+All column methods accept both column names (strings) and zero-based indices (integers).
+
+```php
+// Using indices
+print (CsvTable::fromFile($file))->columnOrder([2, 0])->format();
+
+// Using mixed names and indices
+print (CsvTable::fromFile($file))->onlyColumns(['Name', 2])->format();
+```
+
+### Combining column transformations
+
+Column transformations are applied in order: `onlyColumns()` → `withoutColumns()` → `columnOrder()`.
+
+```php
+print (CsvTable::fromFile($file))
+  ->withoutColumns(['Age'])
+  ->columnOrder(['Country', 'City'])
+  ->format('markdown_table');
+```
+will produce:
+```markdown
+| Country | City     | Name |
+|---------|----------|------|
+| USA     | New York | John |
+| UK      | London   | Jane |
+```
+
+### Reset column transformations
+
+```php
+$table = CsvTable::fromFile($file);
+
+// Apply and use transformations
+$table->columnOrder(['City', 'Name']);
+print $table->format();
+
+// Reset and format without transformations
+print $table->resetColumns()->format();
+
+// Individual reset methods are also available:
+// $table->resetColumnOrder();
+// $table->resetOnlyColumns();
+// $table->resetWithoutColumns();
 ```
 
 ## Maintenance
