@@ -37,6 +37,27 @@ class CsvTable {
   protected bool $shouldParseHeader = TRUE;
 
   /**
+   * Column order configuration.
+   *
+   * @var array<int|string>|null
+   */
+  protected ?array $columnOrder = NULL;
+
+  /**
+   * Columns to include (filter).
+   *
+   * @var array<int|string>|null
+   */
+  protected ?array $onlyColumns = NULL;
+
+  /**
+   * Columns to exclude.
+   *
+   * @var array<int|string>|null
+   */
+  protected ?array $withoutColumns = NULL;
+
+  /**
    * Constructs a CsvTable object.
    *
    * @param string $csvString
@@ -95,6 +116,101 @@ class CsvTable {
    */
   public function withoutHeader(): static {
     $this->shouldParseHeader = FALSE;
+
+    return $this;
+  }
+
+  /**
+   * Set the column order for output.
+   *
+   * Specified columns appear first in the given order, then unspecified
+   * columns are appended preserving their original relative order.
+   *
+   * @param array<int|string> $order
+   *   Column names (strings) or zero-based indices (integers).
+   *
+   * @return $this
+   */
+  public function columnOrder(array $order): static {
+    $this->columnOrder = $order;
+
+    return $this;
+  }
+
+  /**
+   * Filter to only the specified columns.
+   *
+   * Columns are output in the order specified.
+   *
+   * @param array<int|string> $columns
+   *   Column names (strings) or zero-based indices (integers).
+   *
+   * @return $this
+   */
+  public function onlyColumns(array $columns): static {
+    $this->onlyColumns = $columns;
+
+    return $this;
+  }
+
+  /**
+   * Exclude the specified columns.
+   *
+   * Remaining columns keep their original order.
+   *
+   * @param array<int|string> $columns
+   *   Column names (strings) or zero-based indices (integers).
+   *
+   * @return $this
+   */
+  public function withoutColumns(array $columns): static {
+    $this->withoutColumns = $columns;
+
+    return $this;
+  }
+
+  /**
+   * Clear column ordering.
+   *
+   * @return $this
+   */
+  public function resetColumnOrder(): static {
+    $this->columnOrder = NULL;
+
+    return $this;
+  }
+
+  /**
+   * Clear column filter.
+   *
+   * @return $this
+   */
+  public function resetOnlyColumns(): static {
+    $this->onlyColumns = NULL;
+
+    return $this;
+  }
+
+  /**
+   * Clear column exclusions.
+   *
+   * @return $this
+   */
+  public function resetWithoutColumns(): static {
+    $this->withoutColumns = NULL;
+
+    return $this;
+  }
+
+  /**
+   * Clear all column transformations.
+   *
+   * @return $this
+   */
+  public function resetColumns(): static {
+    $this->columnOrder = NULL;
+    $this->onlyColumns = NULL;
+    $this->withoutColumns = NULL;
 
     return $this;
   }
@@ -206,7 +322,121 @@ class CsvTable {
 
     $this->parse();
 
+    $this->applyColumnTransformations();
+
     return call_user_func($formatter, $this->header, $this->rows, $options);
+  }
+
+  /**
+   * Resolve column identifier to index.
+   *
+   * @param int|string $column
+   *   Column name or index.
+   * @param array<string> $header
+   *   Header row for name resolution.
+   * @param int $total_columns
+   *   Total number of columns.
+   *
+   * @return int
+   *   Zero-based column index.
+   *
+   * @throws \InvalidArgumentException
+   *   When column cannot be resolved.
+   */
+  protected function resolveColumnIndex(int|string $column, array $header, int $total_columns): int {
+    if (is_int($column)) {
+      if ($column < 0 || $column >= $total_columns) {
+        throw new \InvalidArgumentException(sprintf('Column index %d is out of bounds (0-%d).', $column, $total_columns - 1));
+      }
+
+      return $column;
+    }
+
+    $index = array_search($column, $header, TRUE);
+    if ($index === FALSE) {
+      throw new \InvalidArgumentException(sprintf('Column "%s" not found in header.', $column));
+    }
+
+    return (int) $index;
+  }
+
+  /**
+   * Apply column transformations to header and rows in place.
+   *
+   * Transformations are applied in order:
+   * 1. onlyColumns - filter to specified columns.
+   * 2. withoutColumns - exclude specified columns.
+   * 3. columnOrder - reorder columns.
+   *
+   * Mutates $this->header and $this->rows directly to reduce memory overhead.
+   */
+  protected function applyColumnTransformations(): void {
+    // No transformations configured - nothing to do.
+    if ($this->onlyColumns === NULL && $this->withoutColumns === NULL && $this->columnOrder === NULL) {
+      return;
+    }
+
+    $total_columns = count($this->header) > 0 ? count($this->header) : (count($this->rows) > 0 ? count($this->rows[0]) : 0);
+
+    if ($total_columns === 0) {
+      return;
+    }
+
+    // Start with all column indices.
+    $indices = range(0, $total_columns - 1);
+
+    // Step 1: Apply onlyColumns filter.
+    if ($this->onlyColumns !== NULL) {
+      $indices = [];
+      foreach ($this->onlyColumns as $column) {
+        $indices[] = $this->resolveColumnIndex($column, $this->header, $total_columns);
+      }
+    }
+
+    // Step 2: Apply withoutColumns exclusion.
+    if ($this->withoutColumns !== NULL) {
+      $exclude_indices = [];
+      foreach ($this->withoutColumns as $column) {
+        $exclude_indices[] = $this->resolveColumnIndex($column, $this->header, $total_columns);
+      }
+      $indices = array_values(array_diff($indices, $exclude_indices));
+    }
+
+    // Step 3: Apply columnOrder reordering.
+    if ($this->columnOrder !== NULL) {
+      $ordered_indices = [];
+      foreach ($this->columnOrder as $column) {
+        $index = $this->resolveColumnIndex($column, $this->header, $total_columns);
+        if (in_array($index, $indices, TRUE)) {
+          $ordered_indices[] = $index;
+        }
+      }
+      // Append remaining indices in their original order.
+      foreach ($indices as $index) {
+        if (!in_array($index, $ordered_indices, TRUE)) {
+          $ordered_indices[] = $index;
+        }
+      }
+      $indices = $ordered_indices;
+    }
+
+    // Mutate header in place.
+    $new_header = [];
+    foreach ($indices as $index) {
+      if (isset($this->header[$index])) {
+        $new_header[] = $this->header[$index];
+      }
+    }
+    $this->header = $new_header;
+
+    // Mutate rows in place - process each row individually to minimize memory.
+    foreach ($this->rows as $i => $row) {
+      $new_row = [];
+      foreach ($indices as $index) {
+        $new_row[] = $row[$index] ?? '';
+      }
+      $this->rows[$i] = $new_row;
+    }
   }
 
   /**

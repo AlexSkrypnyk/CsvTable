@@ -390,4 +390,387 @@ class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
+  /**
+   * Test columnOrder() with column names.
+   */
+  public function testColumnOrderWithNames(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->columnOrder(['City', 'Name'])->format();
+
+    $this->assertEquals(<<< EOD
+    City,Name,Age,Country
+    "New York",John,30,USA
+    London,Jane,25,UK
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test columnOrder() with indices.
+   */
+  public function testColumnOrderWithIndices(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->columnOrder([2, 0])->format();
+
+    $this->assertEquals(<<< EOD
+    City,Name,Age,Country
+    "New York",John,30,USA
+    London,Jane,25,UK
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test columnOrder() with mixed names and indices.
+   */
+  public function testColumnOrderWithMixed(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->columnOrder(['Country', 1])->format();
+
+    $this->assertEquals(<<< EOD
+    Country,Age,Name,City
+    USA,30,John,"New York"
+    UK,25,Jane,London
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test columnOrder() without header using indices.
+   */
+  public function testColumnOrderWithoutHeader(): void {
+    $csv = <<< EOD
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->withoutHeader()->columnOrder([2, 0])->format();
+
+    $this->assertEquals(<<< EOD
+    "New York",John,30,USA
+    London,Jane,25,UK
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test onlyColumns() with column names.
+   */
+  public function testOnlyColumnsWithNames(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->onlyColumns(['City', 'Name'])->format();
+
+    $this->assertEquals(<<< EOD
+    City,Name
+    "New York",John
+    London,Jane
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test onlyColumns() with indices.
+   */
+  public function testOnlyColumnsWithIndices(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->onlyColumns([0, 2])->format();
+
+    $this->assertEquals(<<< EOD
+    Name,City
+    John,"New York"
+    Jane,London
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test withoutColumns() with column names.
+   */
+  public function testWithoutColumnsWithNames(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->withoutColumns(['Age', 'Country'])->format();
+
+    $this->assertEquals(<<< EOD
+    Name,City
+    John,"New York"
+    Jane,London
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test withoutColumns() with indices.
+   */
+  public function testWithoutColumnsWithIndices(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))->withoutColumns([1, 3])->format();
+
+    $this->assertEquals(<<< EOD
+    Name,City
+    John,"New York"
+    Jane,London
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test combined column transformations.
+   */
+  public function testCombinedColumnTransformations(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country,Email
+    John,30,New York,USA,john@example.com
+    Jane,25,London,UK,jane@example.com
+    EOD;
+
+    // Exclude Email, then reorder remaining.
+    $actual = (new CsvTable($csv))
+      ->withoutColumns(['Email'])
+      ->columnOrder(['Country', 'City'])
+      ->format();
+
+    $this->assertEquals(<<< EOD
+    Country,City,Name,Age
+    USA,"New York",John,30
+    UK,London,Jane,25
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test onlyColumns combined with columnOrder.
+   */
+  public function testOnlyColumnsWithColumnOrder(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))
+      ->onlyColumns(['Name', 'City', 'Country'])
+      ->columnOrder(['Country', 'Name'])
+      ->format();
+
+    $this->assertEquals(<<< EOD
+    Country,Name,City
+    USA,John,"New York"
+    UK,Jane,London
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test resetColumnOrder().
+   */
+  public function testResetColumnOrder(): void {
+    $csv = <<< EOD
+    Name,Age,City
+    John,30,New York
+    EOD;
+
+    $table = new CsvTable($csv);
+    $table->columnOrder(['City', 'Name']);
+
+    // First format with reorder.
+    $actual = $table->format();
+    $this->assertEquals(<<< EOD
+    City,Name,Age
+    "New York",John,30
+
+    EOD, $actual);
+
+    // Reset and format again.
+    $actual = $table->resetColumnOrder()->format();
+    $this->assertEquals(<<< EOD
+    Name,Age,City
+    John,30,"New York"
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test resetOnlyColumns().
+   */
+  public function testResetOnlyColumns(): void {
+    $csv = <<< EOD
+    Name,Age,City
+    John,30,New York
+    EOD;
+
+    $table = new CsvTable($csv);
+    $table->onlyColumns(['Name', 'City']);
+
+    // First format with filter.
+    $actual = $table->format();
+    $this->assertEquals(<<< EOD
+    Name,City
+    John,"New York"
+
+    EOD, $actual);
+
+    // Reset and format again.
+    $actual = $table->resetOnlyColumns()->format();
+    $this->assertEquals(<<< EOD
+    Name,Age,City
+    John,30,"New York"
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test resetWithoutColumns().
+   */
+  public function testResetWithoutColumns(): void {
+    $csv = <<< EOD
+    Name,Age,City
+    John,30,New York
+    EOD;
+
+    $table = new CsvTable($csv);
+    $table->withoutColumns(['Age']);
+
+    // First format with exclusion.
+    $actual = $table->format();
+    $this->assertEquals(<<< EOD
+    Name,City
+    John,"New York"
+
+    EOD, $actual);
+
+    // Reset and format again.
+    $actual = $table->resetWithoutColumns()->format();
+    $this->assertEquals(<<< EOD
+    Name,Age,City
+    John,30,"New York"
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test resetColumns() clears all transformations.
+   */
+  public function testResetColumns(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    EOD;
+
+    $table = new CsvTable($csv);
+    $table->onlyColumns(['Name', 'City'])->columnOrder(['City', 'Name']);
+
+    // First format with transformations.
+    $actual = $table->format();
+    $this->assertEquals(<<< EOD
+    City,Name
+    "New York",John
+
+    EOD, $actual);
+
+    // Reset all and format again.
+    $actual = $table->resetColumns()->format();
+    $this->assertEquals(<<< EOD
+    Name,Age,City,Country
+    John,30,"New York",USA
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test invalid column name throws exception.
+   */
+  public function testInvalidColumnNameThrowsException(): void {
+    $csv = <<< EOD
+    Name,Age,City
+    John,30,New York
+    EOD;
+
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Column "InvalidColumn" not found in header.');
+    (new CsvTable($csv))->columnOrder(['InvalidColumn'])->format();
+  }
+
+  /**
+   * Test invalid column index throws exception.
+   */
+  public function testInvalidColumnIndexThrowsException(): void {
+    $csv = <<< EOD
+    Name,Age,City
+    John,30,New York
+    EOD;
+
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Column index 10 is out of bounds (0-2).');
+    (new CsvTable($csv))->columnOrder([10])->format();
+  }
+
+  /**
+   * Test column transformations with Markdown table formatter.
+   */
+  public function testColumnTransformationsWithMarkdownTable(): void {
+    $csv = <<< EOD
+    Name,Age,City,Country
+    John,30,New York,USA
+    Jane,25,London,UK
+    EOD;
+
+    $actual = (new CsvTable($csv))
+      ->withoutColumns(['Age'])
+      ->columnOrder(['Country', 'City'])
+      ->format('markdown_table');
+
+    $this->assertEquals(<<< EOD
+    | Country | City     | Name |
+    |---------|----------|------|
+    | USA     | New York | John |
+    | UK      | London   | Jane |
+
+    EOD, $actual);
+  }
+
+  /**
+   * Test column transformations with empty CSV.
+   */
+  public function testColumnTransformationsWithEmptyCsv(): void {
+    $csv = '';
+
+    $actual = (new CsvTable($csv))->columnOrder([0, 1])->format();
+    $this->assertEquals('', $actual);
+  }
+
 }
