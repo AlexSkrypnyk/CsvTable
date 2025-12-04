@@ -45,10 +45,10 @@
         "lint": [
             "phpcs",
             "phpstan",
-            "rector --clear-cache --dry-run"
+            "rector --dry-run"
         ],
         "lint-fix": [
-            "rector --clear-cache",
+            "rector",
             "phpcbf"
         ],
         "reset": "rm -Rf vendor composer.lock",

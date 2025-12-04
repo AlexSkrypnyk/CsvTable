@@ -345,9 +345,7 @@ class CsvTableUnitTest extends TestCase {
         $output .= "\n" . str_repeat('=', strlen($output)) . "\n";
       }
 
-      return $output . implode("\n", array_map(static function ($row): string {
-          return implode('|', $row);
-      }, $rows));
+      return $output . implode("\n", array_map(static fn($row): string => implode('|', $row), $rows));
     };
 
     $actual = (new CsvTable($csv))->format($custom_formatter);
