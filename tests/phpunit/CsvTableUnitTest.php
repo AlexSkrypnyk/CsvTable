@@ -380,7 +380,7 @@ class CsvTableUnitTest extends TestCase {
   public function testFormatterCustomClassCustomCallback(): void {
     $csv = self::fixtureCsv();
 
-    $actual = (new CsvTable($csv))->format([TestFormatter::class, 'customFormat']);
+    $actual = (new CsvTable($csv))->format(TestFormatter::customFormat(...));
 
     $this->assertEquals(<<< EOD
     col11!col12!col13
