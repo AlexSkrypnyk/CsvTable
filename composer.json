@@ -16,11 +16,11 @@
         "source": "https://github.com/AlexSkrypnyk/CsvTable"
     },
     "require": {
-        "php": ">=8.2"
+        "php": ">=8.5.4"
     },
     "require-dev": {
-        "drupal/coder": "^8.3",
-        "ergebnis/composer-normalize": "^2.44",
+        "drupal/coder": "^8.3.31",
+        "ergebnis/composer-normalize": "^2.50.0",
         "phpstan/phpstan": "^2",
         "phpunit/phpunit": "^12",
         "rector/rector": "^2"
