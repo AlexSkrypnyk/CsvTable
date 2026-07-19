@@ -100,8 +100,6 @@ class CsvTable {
 
   /**
    * Indicates that the CSV data has a header row.
-   *
-   * @return $this
    */
   public function withHeader(): static {
     $this->shouldParseHeader = TRUE;
@@ -111,8 +109,6 @@ class CsvTable {
 
   /**
    * Indicates that the CSV data does not have a header row.
-   *
-   * @return $this
    */
   public function withoutHeader(): static {
     $this->shouldParseHeader = FALSE;
@@ -128,8 +124,6 @@ class CsvTable {
    *
    * @param array<int|string> $order
    *   Column names (strings) or zero-based indices (integers).
-   *
-   * @return $this
    */
   public function columnOrder(array $order): static {
     $this->columnOrder = $order;
@@ -144,8 +138,6 @@ class CsvTable {
    *
    * @param array<int|string> $columns
    *   Column names (strings) or zero-based indices (integers).
-   *
-   * @return $this
    */
   public function onlyColumns(array $columns): static {
     $this->onlyColumns = $columns;
@@ -160,8 +152,6 @@ class CsvTable {
    *
    * @param array<int|string> $columns
    *   Column names (strings) or zero-based indices (integers).
-   *
-   * @return $this
    */
   public function withoutColumns(array $columns): static {
     $this->withoutColumns = $columns;
@@ -171,8 +161,6 @@ class CsvTable {
 
   /**
    * Clear column ordering.
-   *
-   * @return $this
    */
   public function resetColumnOrder(): static {
     $this->columnOrder = NULL;
@@ -182,8 +170,6 @@ class CsvTable {
 
   /**
    * Clear column filter.
-   *
-   * @return $this
    */
   public function resetOnlyColumns(): static {
     $this->onlyColumns = NULL;
@@ -193,8 +179,6 @@ class CsvTable {
 
   /**
    * Clear column exclusions.
-   *
-   * @return $this
    */
   public function resetWithoutColumns(): static {
     $this->withoutColumns = NULL;
@@ -204,8 +188,6 @@ class CsvTable {
 
   /**
    * Clear all column transformations.
-   *
-   * @return $this
    */
   public function resetColumns(): static {
     $this->columnOrder = NULL;
