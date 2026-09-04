@@ -10,8 +10,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class CsvTableUnitTest.
- *
  * Unit tests for CsvTable and default formatters.
  */
 #[CoversClass(CsvTable::class)]
@@ -32,9 +30,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD;
   }
 
-  /**
-   * Test getters.
-   */
   public function testGetters(): void {
     $csv = self::fixtureCsv();
 
@@ -59,9 +54,6 @@ final class CsvTableUnitTest extends TestCase {
     ], $table->getRows());
   }
 
-  /**
-   * Test creating of the class instance using fromFile().
-   */
   public function testFromFile(): void {
     $csv = self::fixtureCsv();
     $file = tempnam(sys_get_temp_dir(), 'csv');
@@ -71,23 +63,17 @@ final class CsvTableUnitTest extends TestCase {
     $this->assertSame($csv, $actual);
   }
 
-  /**
-   * Test non-readable file throws exception.
-   */
   public function testFromFileNotReadableThrowsException(): void {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Unable to read the file non-existing-file.csv');
     CsvTable::fromFile('non-existing-file.csv');
   }
 
-  /**
-   * Test the default behavior using default formatCsv() formatter.
-   */
   #[DataProvider('dataProviderFormatterDefault')]
   public function testFormatterDefault(string $csv, ?bool $with_header, string $expected): void {
     $table = new CsvTable($csv);
 
-    // Allows to assert default behavior.
+    // The NULL case asserts the default behavior.
     if ($with_header !== NULL) {
       if ($with_header) {
         $table->withHeader();
@@ -117,9 +103,6 @@ final class CsvTableUnitTest extends TestCase {
     yield [self::fixtureCsv(), FALSE, self::fixtureCsv()];
   }
 
-  /**
-   * Test table formatter.
-   */
   public function testFormatterTable(): void {
     $csv = self::fixtureCsv();
 
@@ -140,25 +123,17 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test custom CSV separator.
-   */
   public function testFormatterCsvSeparator(): void {
     $csv = self::fixtureCsv();
     $csv_updated = str_replace(',', ';', self::fixtureCsv());
 
-    // Custom separator for parsing, default for formating.
     $actual = (new CsvTable($csv_updated, ';'))->format();
     $this->assertSame($csv, $actual);
 
-    // Custom separator for parsing and formating.
     $actual = (new CsvTable($csv_updated, ';'))->format(NULL, ['separator' => ';']);
     $this->assertSame($csv_updated, $actual);
   }
 
-  /**
-   * Test support for CSV multiline.
-   */
   public function testFormatterCsvMultiline(): void {
     $csv = <<< EOD
     col11,col12,col13
@@ -169,9 +144,6 @@ final class CsvTableUnitTest extends TestCase {
     $this->assertSame($csv, $actual);
   }
 
-  /**
-   * Test formatMarkdownTable().
-   */
   public function testFormatterMarkdownTable(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
@@ -190,9 +162,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test Markdown table formatter for multiline.
-   */
   public function testFormatterMarkdownTableMultiline(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
@@ -211,9 +180,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test Markdown table formatter without header.
-   */
   public function testFormatterMarkdownTableMultilineNoHeader(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
@@ -231,9 +197,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test Markdown table formatter with custom separators.
-   */
   public function testFormatterMarkdownTableCustomSeparators(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc
@@ -256,9 +219,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test Markdown table formatter with empty CSV and no header.
-   */
   public function testFormatterMarkdownTableEmptyNoHeader(): void {
     $csv = '';
 
@@ -267,9 +227,6 @@ final class CsvTableUnitTest extends TestCase {
     $this->assertSame('', $actual);
   }
 
-  /**
-   * Test Markdown table formatter with single row and no header.
-   */
   public function testFormatterMarkdownTableSingleRowNoHeader(): void {
     $csv = 'col11,col12,col13';
 
@@ -281,9 +238,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test Markdown table formatter with varying column counts.
-   */
   public function testFormatterMarkdownTableVaryingColumns(): void {
     $csv = <<< EOD
     col11,col12,col13
@@ -302,9 +256,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test Markdown table formatter with varying column counts and no header.
-   */
   public function testFormatterMarkdownTableVaryingColumnsNoHeader(): void {
     $csv = <<< EOD
     col11,col12,col13
@@ -322,9 +273,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test pass not callable to format().
-   */
   public function testFormatterCustomNotCallable(): void {
     $csv = self::fixtureCsv();
 
@@ -333,9 +281,6 @@ final class CsvTableUnitTest extends TestCase {
     (new CsvTable($csv))->format('Not callable');
   }
 
-  /**
-   * Test using a custom formatter function.
-   */
   public function testFormatterCustomFunction(): void {
     $csv = self::fixtureCsv();
 
@@ -360,9 +305,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test using a custom formatter class with default callback.
-   */
   public function testFormatterCustomClassDefaultCallback(): void {
     $csv = self::fixtureCsv();
 
@@ -376,9 +318,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test using a custom formatter class with custom callback.
-   */
   public function testFormatterCustomClassCustomCallback(): void {
     $csv = self::fixtureCsv();
 
@@ -392,9 +331,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test columnOrder() with column names.
-   */
   public function testColumnOrderWithNames(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -412,9 +348,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test columnOrder() with indices.
-   */
   public function testColumnOrderWithIndices(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -432,9 +365,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test columnOrder() with mixed names and indices.
-   */
   public function testColumnOrderWithMixed(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -452,9 +382,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test columnOrder() without header using indices.
-   */
   public function testColumnOrderNoHeader(): void {
     $csv = <<< EOD
     John,30,New York,USA
@@ -470,9 +397,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test onlyColumns() with column names.
-   */
   public function testOnlyColumnsWithNames(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -490,9 +414,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test onlyColumns() with indices.
-   */
   public function testOnlyColumnsWithIndices(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -510,9 +431,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test withoutColumns() with column names.
-   */
   public function testWithoutColumnsWithNames(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -530,9 +448,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test withoutColumns() with indices.
-   */
   public function testWithoutColumnsWithIndices(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -550,9 +465,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test combined column transformations.
-   */
   public function testCombinedColumnTransformations(): void {
     $csv = <<< EOD
     Name,Age,City,Country,Email
@@ -560,7 +472,6 @@ final class CsvTableUnitTest extends TestCase {
     Jane,25,London,UK,jane@example.com
     EOD;
 
-    // Exclude Email, then reorder remaining.
     $actual = (new CsvTable($csv))
       ->withoutColumns(['Email'])
       ->columnOrder(['Country', 'City'])
@@ -574,9 +485,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test onlyColumns combined with columnOrder.
-   */
   public function testOnlyColumnsWithColumnOrder(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -597,9 +505,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test resetColumnOrder().
-   */
   public function testResetColumnOrder(): void {
     $csv = <<< EOD
     Name,Age,City
@@ -609,7 +514,6 @@ final class CsvTableUnitTest extends TestCase {
     $table = new CsvTable($csv);
     $table->columnOrder(['City', 'Name']);
 
-    // First format with reorder.
     $actual = $table->format();
     $this->assertSame(<<< EOD
     City,Name,Age
@@ -617,7 +521,6 @@ final class CsvTableUnitTest extends TestCase {
 
     EOD, $actual);
 
-    // Reset and format again.
     $actual = $table->resetColumnOrder()->format();
     $this->assertSame(<<< EOD
     Name,Age,City
@@ -626,9 +529,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test resetOnlyColumns().
-   */
   public function testResetOnlyColumns(): void {
     $csv = <<< EOD
     Name,Age,City
@@ -638,7 +538,6 @@ final class CsvTableUnitTest extends TestCase {
     $table = new CsvTable($csv);
     $table->onlyColumns(['Name', 'City']);
 
-    // First format with filter.
     $actual = $table->format();
     $this->assertSame(<<< EOD
     Name,City
@@ -646,7 +545,6 @@ final class CsvTableUnitTest extends TestCase {
 
     EOD, $actual);
 
-    // Reset and format again.
     $actual = $table->resetOnlyColumns()->format();
     $this->assertSame(<<< EOD
     Name,Age,City
@@ -655,9 +553,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test resetWithoutColumns().
-   */
   public function testResetWithoutColumns(): void {
     $csv = <<< EOD
     Name,Age,City
@@ -667,7 +562,6 @@ final class CsvTableUnitTest extends TestCase {
     $table = new CsvTable($csv);
     $table->withoutColumns(['Age']);
 
-    // First format with exclusion.
     $actual = $table->format();
     $this->assertSame(<<< EOD
     Name,City
@@ -675,7 +569,6 @@ final class CsvTableUnitTest extends TestCase {
 
     EOD, $actual);
 
-    // Reset and format again.
     $actual = $table->resetWithoutColumns()->format();
     $this->assertSame(<<< EOD
     Name,Age,City
@@ -684,9 +577,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test resetColumns() clears all transformations.
-   */
   public function testResetColumns(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -696,7 +586,6 @@ final class CsvTableUnitTest extends TestCase {
     $table = new CsvTable($csv);
     $table->onlyColumns(['Name', 'City'])->columnOrder(['City', 'Name']);
 
-    // First format with transformations.
     $actual = $table->format();
     $this->assertSame(<<< EOD
     City,Name
@@ -704,7 +593,6 @@ final class CsvTableUnitTest extends TestCase {
 
     EOD, $actual);
 
-    // Reset all and format again.
     $actual = $table->resetColumns()->format();
     $this->assertSame(<<< EOD
     Name,Age,City,Country
@@ -713,9 +601,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test invalid column name throws exception.
-   */
   public function testInvalidColumnNameThrowsException(): void {
     $csv = <<< EOD
     Name,Age,City
@@ -727,9 +612,6 @@ final class CsvTableUnitTest extends TestCase {
     (new CsvTable($csv))->columnOrder(['InvalidColumn'])->format();
   }
 
-  /**
-   * Test invalid column index throws exception.
-   */
   public function testInvalidColumnIndexThrowsException(): void {
     $csv = <<< EOD
     Name,Age,City
@@ -741,9 +623,6 @@ final class CsvTableUnitTest extends TestCase {
     (new CsvTable($csv))->columnOrder([10])->format();
   }
 
-  /**
-   * Test column transformations with Markdown table formatter.
-   */
   public function testColumnTransformationsWithMarkdownTable(): void {
     $csv = <<< EOD
     Name,Age,City,Country
@@ -765,9 +644,6 @@ final class CsvTableUnitTest extends TestCase {
     EOD, $actual);
   }
 
-  /**
-   * Test column transformations with empty CSV.
-   */
   public function testColumnTransformationsWithEmptyCsv(): void {
     $csv = '';
 

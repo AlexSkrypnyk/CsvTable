@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\CsvTable;
 
 /**
- * Class CsvTable.
- *
  * Manipulates CSV data and outputs it in various formats.
+ *
  * Implemented as a single class for portability.
  *
  * By default, the CSV data is parsed with a header row and formated as a table.
@@ -278,12 +277,12 @@ class CsvTable {
    *   Formatter to use. Can be a function name, a class name, a closure, an
    *   array containing a class name and a method name, or a predefined
    *   formatter available as format<Name> method. If NULL is provided, the
-   *   'CSV" formatter will be used.
+   *   'CSV' formatter will be used.
    * @param array<mixed> $options
    *   An array of options to pass to the formatter. Defaults to an empty array.
    *
    * @return string
-   *   The formated output.
+   *   The formatted output.
    *
    * @throws \Exception
    *   When the formatter is not callable.
@@ -356,7 +355,6 @@ class CsvTable {
    * Mutates $this->header and $this->rows directly to reduce memory overhead.
    */
   protected function applyColumnTransformations(): void {
-    // No transformations configured - nothing to do.
     if ($this->onlyColumns === NULL && $this->withoutColumns === NULL && $this->columnOrder === NULL) {
       return;
     }
@@ -367,10 +365,8 @@ class CsvTable {
       return;
     }
 
-    // Start with all column indices.
     $indices = range(0, $total_columns - 1);
 
-    // Step 1: Apply onlyColumns filter.
     if ($this->onlyColumns !== NULL) {
       $indices = [];
       foreach ($this->onlyColumns as $column) {
@@ -378,7 +374,6 @@ class CsvTable {
       }
     }
 
-    // Step 2: Apply withoutColumns exclusion.
     if ($this->withoutColumns !== NULL) {
       $exclude_indices = [];
       foreach ($this->withoutColumns as $column) {
@@ -387,7 +382,6 @@ class CsvTable {
       $indices = array_values(array_diff($indices, $exclude_indices));
     }
 
-    // Step 3: Apply columnOrder reordering.
     if ($this->columnOrder !== NULL) {
       $ordered_indices = [];
       foreach ($this->columnOrder as $column) {
@@ -396,7 +390,7 @@ class CsvTable {
           $ordered_indices[] = $index;
         }
       }
-      // Append remaining indices in their original order.
+
       foreach ($indices as $index) {
         if (!in_array($index, $ordered_indices, TRUE)) {
           $ordered_indices[] = $index;
@@ -405,7 +399,6 @@ class CsvTable {
       $indices = $ordered_indices;
     }
 
-    // Mutate header in place.
     $new_header = [];
     foreach ($indices as $index) {
       if (isset($this->header[$index])) {
@@ -414,7 +407,7 @@ class CsvTable {
     }
     $this->header = $new_header;
 
-    // Mutate rows in place - process each row individually to minimize memory.
+    // Process each row individually to minimize memory.
     foreach ($this->rows as $i => $row) {
       $new_row = [];
       foreach ($indices as $index) {
@@ -524,7 +517,6 @@ class CsvTable {
     $process_value = fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value);
 
     $create_row = function (array $row, $widths) use ($options): string {
-      // Pad row with empty strings to match the number of columns.
       $row = array_pad($row, count($widths), '');
 
       $output = array_map(
@@ -552,15 +544,12 @@ class CsvTable {
 
     $rows = array_map(fn(array $row): array => array_map(fn(string $value): string => $process_value($value), $row), $rows);
 
-    // Calculate max column widths for each column.
     $all_rows = count($header) > 0 ? array_merge([$header], $rows) : $rows;
     $widths = [];
 
     if (count($all_rows) > 0) {
-      // Find the maximum number of columns across all rows.
       $max_columns = max(array_map(count(...), $all_rows));
 
-      // Calculate width for each column.
       for ($i = 0; $i < $max_columns; $i++) {
         $max_width = 0;
         foreach ($all_rows as $row) {
