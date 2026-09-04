@@ -199,6 +199,9 @@ class CsvTable {
 
   /**
    * Parse the CSV string into header and rows.
+   *
+   * @throws \Exception
+   *   When the memory stream cannot be opened.
    */
   public function parse(): void {
     $rows = [];
@@ -433,6 +436,9 @@ class CsvTable {
    *
    * @return string
    *   The formatted output.
+   *
+   * @throws \Exception
+   *   When the temporary memory stream cannot be opened.
    */
   public static function formatCsv(array $header, array $rows, array $options): string {
     $options += [
