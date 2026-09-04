@@ -79,7 +79,7 @@ final class CsvTableUnitTest extends TestCase {
    * Test the default behavior using default formatCsv() formatter.
    */
   #[DataProvider('dataProviderFormatterDefault')]
-  public function testFormatterDefault(string $csv, bool|null $with_header, string $expected): void {
+  public function testFormatterDefault(string $csv, ?bool $with_header, string $expected): void {
     $table = new CsvTable($csv);
 
     // Allows to assert default behavior.
