@@ -450,7 +450,7 @@ final class CsvTableUnitTest extends TestCase {
   /**
    * Test columnOrder() without header using indices.
    */
-  public function testColumnOrderWithoutHeader(): void {
+  public function testColumnOrderNoHeader(): void {
     $csv = <<< EOD
     John,30,New York,USA
     Jane,25,London,UK
