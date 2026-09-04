@@ -489,7 +489,7 @@ class CsvTable {
       $output .= str_repeat('-', strlen($output) - strlen($options['row_separator'])) . $options['row_separator'];
     }
 
-    return $output . implode($options['row_separator'], array_map(static fn(array $row): string => implode($options['column_separator'], $row), $rows));
+    return $output . implode($options['row_separator'], array_map(fn(array $row): string => implode($options['column_separator'], $row), $rows));
   }
 
   /**
@@ -515,7 +515,7 @@ class CsvTable {
       'value_row_separator' => "<br/>",
     ];
 
-    $process_value = (fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value));
+    $process_value = fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value);
 
     $create_row = function (array $row, $widths) use ($options): string {
       // Pad row with empty strings to match the number of columns.
