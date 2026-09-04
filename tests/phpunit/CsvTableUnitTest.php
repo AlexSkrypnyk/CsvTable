@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
  * Unit tests for CsvTable and default formatters.
  */
 #[CoversClass(CsvTable::class)]
-class CsvTableUnitTest extends TestCase {
+final class CsvTableUnitTest extends TestCase {
 
   /**
    * Fixture CSV.
@@ -68,7 +68,7 @@ class CsvTableUnitTest extends TestCase {
     file_put_contents((string) $file, $csv);
 
     $actual = (CsvTable::fromFile((string) $file))->format();
-    $this->assertEquals($csv, $actual);
+    $this->assertSame($csv, $actual);
 
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Unable to read the file non-existing-file.csv');
@@ -94,25 +94,22 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = $table->format();
 
-    $this->assertEquals($expected, $actual);
+    $this->assertSame($expected, $actual);
   }
 
   /**
    * Data provider for testFormatterDefault().
    *
-   * @return array<mixed>
+   * @return \Iterator<(int | string), mixed>
    *   Data provider
    */
-  public static function dataProviderFormatterDefault(): array {
-    return [
-      ['', NULL, ''],
-      ['', TRUE, ''],
-      ['', FALSE, ''],
-
-      [self::fixtureCsv(), NULL, self::fixtureCsv()],
-      [self::fixtureCsv(), TRUE, self::fixtureCsv()],
-      [self::fixtureCsv(), FALSE, self::fixtureCsv()],
-    ];
+  public static function dataProviderFormatterDefault(): \Iterator {
+    yield ['', NULL, ''];
+    yield ['', TRUE, ''];
+    yield ['', FALSE, ''];
+    yield [self::fixtureCsv(), NULL, self::fixtureCsv()];
+    yield [self::fixtureCsv(), TRUE, self::fixtureCsv()];
+    yield [self::fixtureCsv(), FALSE, self::fixtureCsv()];
   }
 
   /**
@@ -123,7 +120,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format('table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     col11|col12|col13
     -----------------
     col21|col22|col23
@@ -131,7 +128,7 @@ class CsvTableUnitTest extends TestCase {
     EOD, $actual);
 
     $actual = (new CsvTable($csv))->withoutHeader()->format('table');
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     col11|col12|col13
     col21|col22|col23
     col31|col32|col33
@@ -147,7 +144,7 @@ class CsvTableUnitTest extends TestCase {
 
     // Custom separator for parsing, default for formating.
     $actual = (new CsvTable($csv_updated, ';'))->format();
-    $this->assertEquals($csv, $actual);
+    $this->assertSame($csv, $actual);
 
     // Custom separator for parsing and formating.
     $actual = (new CsvTable($csv_updated, ';'))->format(NULL, ['separator' => ';']);
@@ -164,7 +161,7 @@ class CsvTableUnitTest extends TestCase {
 
     EOD;
     $actual = (new CsvTable($csv))->format();
-    $this->assertEquals($csv, $actual);
+    $this->assertSame($csv, $actual);
   }
 
   /**
@@ -179,7 +176,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11a | col12ab     | col13abc  |
     |--------|-------------|-----------|
     | col21a | col22ab cde | col23abc  |
@@ -200,7 +197,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11a | col12ab          | col13abc  |
     |--------|------------------|-----------|
     | col21a | col22ab<br/>cdef | col23abc  |
@@ -221,7 +218,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11a | col12ab          | col13abc  |
     | col21a | col22ab<br/>cdef | col23abc  |
     | col31a | col32ab          | col33abcd |
@@ -245,7 +242,7 @@ class CsvTableUnitTest extends TestCase {
       'header_separator' => '=',
     ]);
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11a | col12ab     | col13abc  |
     |========|=============|===========|
     | col21a | col22ab cde | col23abc  |
@@ -262,7 +259,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
 
-    $this->assertEquals('', $actual);
+    $this->assertSame('', $actual);
   }
 
   /**
@@ -273,7 +270,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11 | col12 | col13 |
 
     EOD, $actual);
@@ -291,7 +288,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11 | col12 | col13 |       |
     |-------|-------|-------|-------|
     | col21 | col22 |       |       |
@@ -312,7 +309,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutHeader()->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | col11 | col12 | col13 |       |
     | col21 | col22 |       |       |
     | col31 | col32 | col33 | col34 |
@@ -350,7 +347,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format($custom_formatter);
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     col11|col12|col13
     =================
     col21|col22|col23
@@ -366,7 +363,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format(TestFormatter::class);
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     col11|col12|col13
     =================
     col21|col22|col23
@@ -382,7 +379,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->format(TestFormatter::customFormat(...));
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     col11!col12!col13
     =================
     col21!col22!col23
@@ -402,7 +399,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->columnOrder(['City', 'Name'])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     City,Name,Age,Country
     "New York",John,30,USA
     London,Jane,25,UK
@@ -422,7 +419,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->columnOrder([2, 0])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     City,Name,Age,Country
     "New York",John,30,USA
     London,Jane,25,UK
@@ -442,7 +439,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->columnOrder(['Country', 1])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Country,Age,Name,City
     USA,30,John,"New York"
     UK,25,Jane,London
@@ -461,7 +458,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutHeader()->columnOrder([2, 0])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     "New York",John,30,USA
     London,Jane,25,UK
 
@@ -480,7 +477,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->onlyColumns(['City', 'Name'])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     City,Name
     "New York",John
     London,Jane
@@ -500,7 +497,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->onlyColumns([0, 2])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,City
     John,"New York"
     Jane,London
@@ -520,7 +517,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutColumns(['Age', 'Country'])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,City
     John,"New York"
     Jane,London
@@ -540,7 +537,7 @@ class CsvTableUnitTest extends TestCase {
 
     $actual = (new CsvTable($csv))->withoutColumns([1, 3])->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,City
     John,"New York"
     Jane,London
@@ -564,7 +561,7 @@ class CsvTableUnitTest extends TestCase {
       ->columnOrder(['Country', 'City'])
       ->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Country,City,Name,Age
     USA,"New York",John,30
     UK,London,Jane,25
@@ -587,7 +584,7 @@ class CsvTableUnitTest extends TestCase {
       ->columnOrder(['Country', 'Name'])
       ->format();
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Country,Name,City
     USA,John,"New York"
     UK,Jane,London
@@ -609,7 +606,7 @@ class CsvTableUnitTest extends TestCase {
 
     // First format with reorder.
     $actual = $table->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     City,Name,Age
     "New York",John,30
 
@@ -617,7 +614,7 @@ class CsvTableUnitTest extends TestCase {
 
     // Reset and format again.
     $actual = $table->resetColumnOrder()->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,Age,City
     John,30,"New York"
 
@@ -638,7 +635,7 @@ class CsvTableUnitTest extends TestCase {
 
     // First format with filter.
     $actual = $table->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,City
     John,"New York"
 
@@ -646,7 +643,7 @@ class CsvTableUnitTest extends TestCase {
 
     // Reset and format again.
     $actual = $table->resetOnlyColumns()->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,Age,City
     John,30,"New York"
 
@@ -667,7 +664,7 @@ class CsvTableUnitTest extends TestCase {
 
     // First format with exclusion.
     $actual = $table->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,City
     John,"New York"
 
@@ -675,7 +672,7 @@ class CsvTableUnitTest extends TestCase {
 
     // Reset and format again.
     $actual = $table->resetWithoutColumns()->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,Age,City
     John,30,"New York"
 
@@ -696,7 +693,7 @@ class CsvTableUnitTest extends TestCase {
 
     // First format with transformations.
     $actual = $table->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     City,Name
     "New York",John
 
@@ -704,7 +701,7 @@ class CsvTableUnitTest extends TestCase {
 
     // Reset all and format again.
     $actual = $table->resetColumns()->format();
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     Name,Age,City,Country
     John,30,"New York",USA
 
@@ -754,7 +751,7 @@ class CsvTableUnitTest extends TestCase {
       ->columnOrder(['Country', 'City'])
       ->format('markdown_table');
 
-    $this->assertEquals(<<< EOD
+    $this->assertSame(<<< EOD
     | Country | City     | Name |
     |---------|----------|------|
     | USA     | New York | John |
@@ -770,7 +767,7 @@ class CsvTableUnitTest extends TestCase {
     $csv = '';
 
     $actual = (new CsvTable($csv))->columnOrder([0, 1])->format();
-    $this->assertEquals('', $actual);
+    $this->assertSame('', $actual);
   }
 
 }
