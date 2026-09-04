@@ -83,7 +83,7 @@ final class CsvTableUnitTest extends TestCase {
     $table = new CsvTable($csv);
 
     // Allows to assert default behavior.
-    if (!is_null($with_header)) {
+    if ($with_header !== NULL) {
       if ($with_header) {
         $table->withHeader();
       }
