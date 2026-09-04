@@ -257,15 +257,15 @@ class CsvTable {
       throw new \Exception(sprintf('Unable to read the file %s.', $filepath));
     }
 
-    $content = file_get_contents($filepath);
+    $csv = file_get_contents($filepath);
 
-    if ($content === FALSE) {
+    if ($csv === FALSE) {
       // @codeCoverageIgnoreStart
       throw new \Exception(sprintf('Unable to read the file %s.', $filepath));
       // @codeCoverageIgnoreEnd
     }
 
-    return new static($content, $separator, $enclosure, $escape);
+    return new static($csv, $separator, $enclosure, $escape);
   }
 
   /**
