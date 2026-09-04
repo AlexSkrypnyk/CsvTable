@@ -69,7 +69,12 @@ final class CsvTableUnitTest extends TestCase {
 
     $actual = (CsvTable::fromFile((string) $file))->format();
     $this->assertSame($csv, $actual);
+  }
 
+  /**
+   * Test non-readable file throws exception.
+   */
+  public function testFromFileNotReadableThrowsException(): void {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Unable to read the file non-existing-file.csv');
     CsvTable::fromFile('non-existing-file.csv');
