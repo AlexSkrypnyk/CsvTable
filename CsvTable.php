@@ -542,9 +542,9 @@ class CsvTable {
       return $output . str_repeat($options['header_separator'], $cols_widths[count($cols_widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
     };
 
-    $header = array_map(fn(string $col): string => $process_value($col), $header);
+    $header = array_map(fn(string $value): string => $process_value($value), $header);
 
-    $rows = array_map(fn(array $row): array => array_map(fn(string $col): string => $process_value($col), $row), $rows);
+    $rows = array_map(fn(array $row): array => array_map(fn(string $value): string => $process_value($value), $row), $rows);
 
     // Calculate max column widths for each column.
     $all_rows = count($header) > 0 ? array_merge([$header], $rows) : $rows;
