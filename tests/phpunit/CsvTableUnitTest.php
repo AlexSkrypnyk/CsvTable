@@ -153,7 +153,7 @@ final class CsvTableUnitTest extends TestCase {
 
     // Custom separator for parsing and formating.
     $actual = (new CsvTable($csv_updated, ';'))->format(NULL, ['separator' => ';']);
-    $this->assertEquals($csv_updated, $actual);
+    $this->assertSame($csv_updated, $actual);
   }
 
   /**
