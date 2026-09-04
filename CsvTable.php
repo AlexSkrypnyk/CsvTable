@@ -517,29 +517,29 @@ class CsvTable {
 
     $process_value = (fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value));
 
-    $create_row = function (array $row, $cols_widths) use ($options): string {
+    $create_row = function (array $row, $widths) use ($options): string {
       // Pad row with empty strings to match the number of columns.
-      $row = array_pad($row, count($cols_widths), '');
+      $row = array_pad($row, count($widths), '');
 
       $output = array_map(
         str_pad(...),
         $row,
-        $cols_widths
+        $widths
       );
 
       return $options['column_separator'] . ' ' . implode(' ' . $options['column_separator'] . ' ', $output)
         . ' ' . $options['column_separator'] . $options['row_separator'];
     };
 
-    $create_header_separator = function ($cols_widths) use ($options): string {
+    $create_header_separator = function ($widths) use ($options): string {
       $output = $options['column_separator'];
 
-      for ($i = 0; $i < count($cols_widths) - 1; $i++) {
-        $output .= str_repeat($options['header_separator'], $cols_widths[$i] + 2);
+      for ($i = 0; $i < count($widths) - 1; $i++) {
+        $output .= str_repeat($options['header_separator'], $widths[$i] + 2);
         $output .= $options['column_separator'];
       }
 
-      return $output . str_repeat($options['header_separator'], $cols_widths[count($cols_widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
+      return $output . str_repeat($options['header_separator'], $widths[count($widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
     };
 
     $header = array_map(fn(string $value): string => $process_value($value), $header);
