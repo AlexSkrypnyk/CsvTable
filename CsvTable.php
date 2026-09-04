@@ -213,8 +213,8 @@ class CsvTable {
 
     fwrite($stream, $this->csvString);
     rewind($stream);
-    while (($data = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
-      $rows[] = $data;
+    while (($row = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
+      $rows[] = $row;
     }
     fclose($stream);
 
