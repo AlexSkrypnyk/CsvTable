@@ -2,10 +2,11 @@
 <ruleset name="custom">
     <description>Custom PHPCS standard.</description>
 
-    <!-- Using Drupal coding standard as a base-fix. -->
+    <!-- Using Drupal coding standard as a base. -->
     <rule ref="Drupal"/>
+    <rule ref="DrevOps"/>
     <!-- Checks that the strict_types has been declared. -->
-    <rule ref="Generic.PHP.RequireStrictTypes" />
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
 
     <!-- Show sniff codes in all reports -->
     <arg value="s"/>
@@ -14,7 +15,7 @@
     <arg name="colors"/>
 
     <file>CsvTable.php</file>
-    <file>tests</file>
+    <file>tests/phpunit</file>
 
     <!-- Allow long array lines in tests. -->
     <rule ref="Drupal.Arrays.Array.LongLineDeclaration">

@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
-  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=CsvTable&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="Yourproject logo"></a>
+  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=CsvTable&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="CsvTable logo"></a>
 </p>
 
 <h1 align="center">PHP class to parse and format CSV content</h1>
@@ -9,7 +9,7 @@
 
 [![GitHub Issues](https://img.shields.io/github/issues/AlexSkrypnyk/CsvTable.svg)](https://github.com/AlexSkrypnyk/CsvTable/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/CsvTable.svg)](https://github.com/AlexSkrypnyk/CsvTable/pulls)
-[![Test](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test-php.yml/badge.svg)](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test-php.yml)
+[![Test PHP](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test-php.yml/badge.svg)](https://github.com/AlexSkrypnyk/CsvTable/actions/workflows/test-php.yml)
 [![codecov](https://codecov.io/gh/AlexSkrypnyk/CsvTable/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/CsvTable)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/CsvTable)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/CsvTable)
@@ -245,12 +245,13 @@ print $table->resetColumns()->format();
 // $table->resetWithoutColumns();
 ```
 
-## Maintenance
+## Contributing
 
-```bash
-composer install
-composer lint
-composer test
-```
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the linting and testing commands.
+
+## Updating
+
+To pull the latest infrastructure from the template into this project, ask Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
+
 ---
 _This repository was created using the [Scaffold](https://getscaffold.dev/) project template_
