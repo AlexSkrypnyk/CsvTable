@@ -67,10 +67,10 @@ col21,col22,col23
 col31,col32,col33
 ```
 
-### Using `text_table` formatter
+### Using `table` formatter
 
 ```php
-print (CsvTable::fromFile($file))->format('text_table');
+print (CsvTable::fromFile($file))->format('table');
 ```
 will produce table content:
 ```csv
@@ -80,10 +80,10 @@ col21|col22|col23
 col31|col32|col33     
 ```
 
-### Using `text_table` formatter without a header
+### Using `table` formatter without a header
 
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->format('text_table');
+print (CsvTable::fromFile($file))->withoutHeader()->format('table');
 ```
 will produce table content:
 ```csv
