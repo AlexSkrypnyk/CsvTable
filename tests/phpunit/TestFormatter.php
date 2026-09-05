@@ -26,19 +26,19 @@ class TestFormatter {
     $output = '';
 
     $options += [
-      'delimiter' => '|',
+      'column_separator' => '|',
     ];
 
     if (count($header) > 0) {
-      $output = implode($options['delimiter'], $header);
+      $output = implode($options['column_separator'], $header);
       $output .= "\n" . str_repeat('=', strlen($output)) . "\n";
     }
 
-    return $output . implode("\n", array_map(static fn(array $row): string => implode($options['delimiter'], $row), $rows));
+    return $output . implode("\n", array_map(static fn(array $row): string => implode($options['column_separator'], $row), $rows));
   }
 
   /**
-   * Format a table with a custom delimiter.
+   * Format a table with a custom column separator.
    *
    * @param array<int, string> $header
    *   The header.
@@ -49,7 +49,7 @@ class TestFormatter {
    *   The formatted table.
    */
   public static function customFormat(array $header, array $rows): string {
-    return static::format($header, $rows, ['delimiter' => '!']);
+    return static::format($header, $rows, ['column_separator' => '!']);
   }
 
 }

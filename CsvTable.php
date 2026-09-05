@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\CsvTable;
 
 /**
- * Class CsvTable.
- *
  * Manipulates CSV data and outputs it in various formats.
+ *
  * Implemented as a single class for portability.
  *
  * By default, the CSV data is parsed with a header row and formated as a table.
@@ -199,6 +198,9 @@ class CsvTable {
 
   /**
    * Parse the CSV string into header and rows.
+   *
+   * @throws \Exception
+   *   When the memory stream cannot be opened.
    */
   public function parse(): void {
     $rows = [];
@@ -213,8 +215,8 @@ class CsvTable {
 
     fwrite($stream, $this->csvString);
     rewind($stream);
-    while (($data = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
-      $rows[] = $data;
+    while (($row = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
+      $rows[] = $row;
     }
     fclose($stream);
 
@@ -257,15 +259,15 @@ class CsvTable {
       throw new \Exception(sprintf('Unable to read the file %s.', $filepath));
     }
 
-    $content = file_get_contents($filepath);
+    $csv = file_get_contents($filepath);
 
-    if ($content === FALSE) {
+    if ($csv === FALSE) {
       // @codeCoverageIgnoreStart
       throw new \Exception(sprintf('Unable to read the file %s.', $filepath));
       // @codeCoverageIgnoreEnd
     }
 
-    return new static($content, $separator, $enclosure, $escape);
+    return new static($csv, $separator, $enclosure, $escape);
   }
 
   /**
@@ -275,12 +277,12 @@ class CsvTable {
    *   Formatter to use. Can be a function name, a class name, a closure, an
    *   array containing a class name and a method name, or a predefined
    *   formatter available as format<Name> method. If NULL is provided, the
-   *   'CSV" formatter will be used.
+   *   'CSV' formatter will be used.
    * @param array<mixed> $options
    *   An array of options to pass to the formatter. Defaults to an empty array.
    *
    * @return string
-   *   The formated output.
+   *   The formatted output.
    *
    * @throws \Exception
    *   When the formatter is not callable.
@@ -353,7 +355,6 @@ class CsvTable {
    * Mutates $this->header and $this->rows directly to reduce memory overhead.
    */
   protected function applyColumnTransformations(): void {
-    // No transformations configured - nothing to do.
     if ($this->onlyColumns === NULL && $this->withoutColumns === NULL && $this->columnOrder === NULL) {
       return;
     }
@@ -364,10 +365,8 @@ class CsvTable {
       return;
     }
 
-    // Start with all column indices.
     $indices = range(0, $total_columns - 1);
 
-    // Step 1: Apply onlyColumns filter.
     if ($this->onlyColumns !== NULL) {
       $indices = [];
       foreach ($this->onlyColumns as $column) {
@@ -375,7 +374,6 @@ class CsvTable {
       }
     }
 
-    // Step 2: Apply withoutColumns exclusion.
     if ($this->withoutColumns !== NULL) {
       $exclude_indices = [];
       foreach ($this->withoutColumns as $column) {
@@ -384,7 +382,6 @@ class CsvTable {
       $indices = array_values(array_diff($indices, $exclude_indices));
     }
 
-    // Step 3: Apply columnOrder reordering.
     if ($this->columnOrder !== NULL) {
       $ordered_indices = [];
       foreach ($this->columnOrder as $column) {
@@ -393,7 +390,7 @@ class CsvTable {
           $ordered_indices[] = $index;
         }
       }
-      // Append remaining indices in their original order.
+
       foreach ($indices as $index) {
         if (!in_array($index, $ordered_indices, TRUE)) {
           $ordered_indices[] = $index;
@@ -402,7 +399,6 @@ class CsvTable {
       $indices = $ordered_indices;
     }
 
-    // Mutate header in place.
     $new_header = [];
     foreach ($indices as $index) {
       if (isset($this->header[$index])) {
@@ -411,7 +407,7 @@ class CsvTable {
     }
     $this->header = $new_header;
 
-    // Mutate rows in place - process each row individually to minimize memory.
+    // Process each row individually to minimize memory.
     foreach ($this->rows as $i => $row) {
       $new_row = [];
       foreach ($indices as $index) {
@@ -433,6 +429,9 @@ class CsvTable {
    *
    * @return string
    *   The formatted output.
+   *
+   * @throws \Exception
+   *   When the temporary memory stream cannot be opened.
    */
   public static function formatCsv(array $header, array $rows, array $options): string {
     $options += [
@@ -489,7 +488,7 @@ class CsvTable {
       $output .= str_repeat('-', strlen($output) - strlen($options['row_separator'])) . $options['row_separator'];
     }
 
-    return $output . implode($options['row_separator'], array_map(static fn(array $row): string => implode($options['column_separator'], $row), $rows));
+    return $output . implode($options['row_separator'], array_map(fn(array $row): string => implode($options['column_separator'], $row), $rows));
   }
 
   /**
@@ -515,46 +514,42 @@ class CsvTable {
       'value_row_separator' => "<br/>",
     ];
 
-    $process_value = (fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value));
+    $process_value = fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value);
 
-    $create_row = function (array $row, $cols_widths) use ($options): string {
-      // Pad row with empty strings to match the number of columns.
-      $row = array_pad($row, count($cols_widths), '');
+    $create_row = function (array $row, $widths) use ($options): string {
+      $row = array_pad($row, count($widths), '');
 
       $output = array_map(
         str_pad(...),
         $row,
-        $cols_widths
+        $widths
       );
 
       return $options['column_separator'] . ' ' . implode(' ' . $options['column_separator'] . ' ', $output)
         . ' ' . $options['column_separator'] . $options['row_separator'];
     };
 
-    $create_header_separator = function ($cols_widths) use ($options): string {
+    $create_header_separator = function ($widths) use ($options): string {
       $output = $options['column_separator'];
 
-      for ($i = 0; $i < count($cols_widths) - 1; $i++) {
-        $output .= str_repeat($options['header_separator'], $cols_widths[$i] + 2);
+      for ($i = 0; $i < count($widths) - 1; $i++) {
+        $output .= str_repeat($options['header_separator'], $widths[$i] + 2);
         $output .= $options['column_separator'];
       }
 
-      return $output . str_repeat($options['header_separator'], $cols_widths[count($cols_widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
+      return $output . str_repeat($options['header_separator'], $widths[count($widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
     };
 
-    $header = array_map(fn(string $col): string => $process_value($col), $header);
+    $header = array_map(fn(string $value): string => $process_value($value), $header);
 
-    $rows = array_map(fn(array $row): array => array_map(fn(string $col): string => $process_value($col), $row), $rows);
+    $rows = array_map(fn(array $row): array => array_map(fn(string $value): string => $process_value($value), $row), $rows);
 
-    // Calculate max column widths for each column.
     $all_rows = count($header) > 0 ? array_merge([$header], $rows) : $rows;
     $widths = [];
 
     if (count($all_rows) > 0) {
-      // Find the maximum number of columns across all rows.
       $max_columns = max(array_map(count(...), $all_rows));
 
-      // Calculate width for each column.
       for ($i = 0; $i < $max_columns; $i++) {
         $max_width = 0;
         foreach ($all_rows as $row) {
