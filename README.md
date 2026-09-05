@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="" rel="noopener">
+  <a href="https://github.com/AlexSkrypnyk/CsvTable" rel="noopener">
   <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=CsvTable&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="CsvTable logo"></a>
 </p>
 
@@ -19,18 +19,18 @@
 
 ---
 
-## Features
+## ✨ Features
 
 - Single-file class to manipulate CSV table.
 - Formatters for CSV, text table and Markdown table.
 - Support for a custom formatter.
 - Column manipulation: reorder, filter, and exclude columns.
 
-## Requirements
+## 📋 Requirements
 
 PHP 8.3 or newer. The class uses only the PHP standard library, so `CsvTable.php` can also be dropped into a project that does not use Composer.
 
-## Installation
+## 📦 Installation
 
 ```bash
 composer require alexskrypnyk/csvtable
@@ -38,7 +38,7 @@ composer require alexskrypnyk/csvtable
 
 The class is `AlexSkrypnyk\CsvTable\CsvTable`.
 
-## Usage
+## 🚀 Usage
 
 Given a CSV file with the following content:
 
@@ -76,6 +76,8 @@ col11,col12,col13
 col21,col22,col23
 col31,col32,col33
 ```
+
+`fromFile()` throws an `Exception` when the file is missing or cannot be read.
 
 ### Reading the parsed data
 
@@ -240,7 +242,9 @@ print (CsvTable::fromFile($file))
   ->format([CustomFormatter::class, 'customFormat'], $formatter_options);
 ```
 
-## Column Manipulation
+`format()` throws an `Exception` when the value passed to it cannot be resolved to a callable.
+
+## 🔀 Column Manipulation
 
 Given a CSV file with the following content:
 
@@ -356,11 +360,11 @@ print $table->format();
 print $table->resetColumns()->format();
 ```
 
-## Contributing
+## 🤝 Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the linting and testing commands.
 
-## Updating
+## 🔄 Updating
 
 To pull the latest infrastructure from the template into this project, ask Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
 
