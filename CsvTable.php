@@ -9,7 +9,7 @@ namespace AlexSkrypnyk\CsvTable;
  *
  * Implemented as a single class for portability.
  *
- * By default, the CSV data is parsed with a header row and formated as a table.
+ * By default, the CSV data is parsed with a header row and formatted as CSV.
  *
  * A custom formatter allows the parsed CSV data to be output in an alternative
  * format.
