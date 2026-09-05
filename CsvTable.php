@@ -358,7 +358,7 @@ class CsvTable {
       return;
     }
 
-    $total_columns = count($this->header) > 0 ? count($this->header) : (count($this->rows) > 0 ? count($this->rows[0]) : 0);
+    $total_columns = count($this->header) > 0 ? count($this->header) : count($this->rows[0] ?? []);
 
     if ($total_columns === 0) {
       return;
@@ -566,9 +566,9 @@ class CsvTable {
       return $output . str_repeat($options['header_separator'], $widths[count($widths) - 1] + 2) . $options['column_separator'] . $options['row_separator'];
     };
 
-    $header = array_map(fn(string $value): string => $process_value($value), $header);
+    $header = array_map($process_value, $header);
 
-    $rows = array_map(fn(array $row): array => array_map(fn(string $value): string => $process_value($value), $row), $rows);
+    $rows = array_map(fn(array $row): array => array_map($process_value, $row), $rows);
 
     $all_rows = count($header) > 0 ? array_merge([$header], $rows) : $rows;
     $widths = [];
