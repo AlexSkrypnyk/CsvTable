@@ -54,11 +54,16 @@ A custom formatter is an anonymous function, a class method passed as
 
 ### Key Implementation Details
 
-- `parse()` uses `str_getcsv()` to parse CSV strings line by line.
+- `parse()` writes the CSV string to a `php://memory` stream and reads it back
+  with `fgetcsv()`. Do not replace this with line-by-line `str_getcsv()`:
+  `fgetcsv()` reads across line boundaries while inside an enclosure, which is
+  what allows a quoted value to contain a newline. Splitting the input into
+  lines first breaks that, and `testFormatterCsvMultiline` covers it.
 - `$shouldParseHeader` controls header parsing.
-- The Markdown table formatter transposes rows with `array_map(NULL, ...)` to
-  calculate column widths. Rows of differing lengths produce `NULL` entries, so
-  the type hints are `?string`.
+- The Markdown table formatter calculates column widths with an index loop over
+  the maximum column count, guarding each cell with `isset()`. Ragged rows
+  therefore never produce a `NULL` cell, and the callbacks are typed `string`
+  rather than `?string`.
 
 ## Commands
 
