@@ -144,6 +144,64 @@ final class CsvTableUnitTest extends TestCase {
     $this->assertSame($csv, $actual);
   }
 
+  public function testFormatterCsvEnclosureInValue(): void {
+    $csv = <<< EOD
+    col11,col12,col13
+    col21,"col22 ""quoted"" value",col23
+
+    EOD;
+
+    $table = new CsvTable($csv);
+    $table->parse();
+
+    $this->assertSame([['col21', 'col22 "quoted" value', 'col23']], $table->getRows());
+    $this->assertSame($csv, (new CsvTable($csv))->format());
+  }
+
+  public function testFormatterCsvCustomEnclosure(): void {
+    $csv = <<< EOD
+    col11,col12
+    col21,'col22,more'
+
+    EOD;
+
+    $table = new CsvTable($csv, ',', "'");
+    $table->parse();
+
+    $this->assertSame([['col21', 'col22,more']], $table->getRows());
+    $this->assertSame($csv, $table->format(NULL, ['enclosure' => "'"]));
+  }
+
+  public function testParseCustomEscape(): void {
+    $csv = <<< EOD
+    col11,col12
+    col21,"col22~"more"
+
+    EOD;
+
+    $table = new CsvTable($csv, ',', '"', '~');
+    $table->parse();
+
+    // fgetcsv() keeps the escape character in the parsed value.
+    $this->assertSame([['col21', 'col22~"more']], $table->getRows());
+  }
+
+  public function testFormatterMarkdownTableEnclosureInValue(): void {
+    $csv = <<< EOD
+    col11,col12,col13
+    col21,"col22 ""quoted"" value",col23
+    EOD;
+
+    $actual = (new CsvTable($csv))->format('markdown_table');
+
+    $this->assertSame(<<< EOD
+    | col11 | col12                | col13 |
+    |-------|----------------------|-------|
+    | col21 | col22 "quoted" value | col23 |
+
+    EOD, $actual);
+  }
+
   public function testFormatterMarkdownTable(): void {
     $csv = <<< EOD
     col11a,col12ab,col13abc

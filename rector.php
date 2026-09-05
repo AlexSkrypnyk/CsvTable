@@ -3,9 +3,6 @@
 /**
  * @file
  * Rector configuration.
- *
- * Usage:
- * ./vendor/bin/rector process .
  */
 
 declare(strict_types=1);
