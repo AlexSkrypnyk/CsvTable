@@ -26,33 +26,41 @@
 - Support for a custom formatter.
 - Column manipulation: reorder, filter, and exclude columns.
 
+## Requirements
+
+PHP 8.3 or newer. The class uses only the PHP standard library, so `CsvTable.php` can also be dropped into a project that does not use Composer.
+
 ## Installation
 
 ```bash
 composer require alexskrypnyk/csvtable
-```    
+```
+
+The class is `AlexSkrypnyk\CsvTable\CsvTable`.
 
 ## Usage
 
 Given a CSV file with the following content:
+
 ```csv
 col11,col12,col13
 col21,col22,col23
-col31,col32,col33      
+col31,col32,col33
 ```
 
 ### From string
 
 ```php
 $csv = file_get_contents($csv_file);
-// Format using the default formatter.
 print (new CsvTable($csv))->format();
 ```
+
 will produce identical CSV content by default:
+
 ```csv
 col11,col12,col13
 col21,col22,col23
-col31,col32,col33      
+col31,col32,col33
 ```
 
 ### From file
@@ -60,11 +68,52 @@ col31,col32,col33
 ```php
 print (CsvTable::fromFile($file))->format();
 ```
+
 will produce identical CSV content by default:
+
 ```csv
 col11,col12,col13
 col21,col22,col23
 col31,col32,col33
+```
+
+### Reading the parsed data
+
+`parse()` populates the header and the rows, which are then available through `getHeader()` and `getRows()`. Calling `format()` parses the content automatically, so `parse()` is only needed when reading the data directly.
+
+```php
+$table = new CsvTable($csv);
+$table->parse();
+
+// ['col11', 'col12', 'col13']
+print_r($table->getHeader());
+
+// [['col21', 'col22', 'col23'], ['col31', 'col32', 'col33']]
+print_r($table->getRows());
+```
+
+### Custom separator, enclosure and escape characters
+
+The constructor and `fromFile()` both accept the separator, enclosure and escape characters used to *read* the content. They default to `,`, `"` and `\`.
+
+```php
+// Parse semicolon-separated content.
+$table = new CsvTable($csv_semicolon, ';');
+
+// The same, reading from a file.
+$table = CsvTable::fromFile($file_semicolon, ';');
+```
+
+These characters apply to parsing only. The `csv` formatter writes using its own `separator`, `enclosure` and `escape` options, so semicolon-separated input is written back as comma-separated content unless the formatter is told otherwise:
+
+```php
+$table = new CsvTable($csv_semicolon, ';');
+
+// Comma-separated output.
+print $table->format();
+
+// Semicolon-separated output.
+print $table->format(NULL, ['separator' => ';']);
 ```
 
 ### Using `table` formatter
@@ -72,12 +121,14 @@ col31,col32,col33
 ```php
 print (CsvTable::fromFile($file))->format('table');
 ```
+
 will produce table content:
-```csv
+
+```text
 col11|col12|col13
 -----------------
 col21|col22|col23
-col31|col32|col33     
+col31|col32|col33
 ```
 
 ### Using `table` formatter without a header
@@ -85,27 +136,65 @@ col31|col32|col33
 ```php
 print (CsvTable::fromFile($file))->withoutHeader()->format('table');
 ```
+
 will produce table content:
-```csv
+
+```text
 col11|col12|col13
 col21|col22|col23
-col31|col32|col33     
+col31|col32|col33
 ```
+
+`withHeader()` restores the default behaviour of treating the first row as a header.
 
 ### Using `markdown_table` formatter
 
 ```php
 print (CsvTable::fromFile($file))->format('markdown_table');
 ```
+
 will produce Markdown table:
+
 ```markdown
 | col11 | col12 | col13 |
 |-------|-------|-------|
 | col21 | col22 | col23 |
-| col31 | col32 | col33 |     
+| col31 | col32 | col33 |
+```
+
+### Formatter options
+
+Options are passed as the second argument to `format()` and are merged over the defaults below.
+
+| Formatter        | Option                 | Default | Description                                     |
+|------------------|------------------------|---------|-------------------------------------------------|
+| `csv`            | `separator`            | `,`     | Character written between values.               |
+| `csv`            | `enclosure`            | `"`     | Character used to enclose values.               |
+| `csv`            | `escape`               | `\`     | Character used to escape special characters.    |
+| `table`          | `column_separator`     | `\|`    | String written between columns.                 |
+| `table`          | `row_separator`        | `\n`    | String written between rows.                    |
+| `markdown_table` | `column_separator`     | `\|`    | String written between columns.                 |
+| `markdown_table` | `row_separator`        | `\n`    | String written between rows.                    |
+| `markdown_table` | `header_separator`     | `-`     | Character filling the row under the header.     |
+| `markdown_table` | `value_row_separator`  | `<br/>` | Replaces newlines found within a value.         |
+
+```php
+print (CsvTable::fromFile($file))
+  ->format('markdown_table', ['header_separator' => '=']);
+```
+
+will produce:
+
+```markdown
+| col11 | col12 | col13 |
+|=======|=======|=======|
+| col21 | col22 | col23 |
+| col31 | col32 | col33 |
 ```
 
 ### Custom formatter as an anonymous callback
+
+A formatter receives the header columns, the rows and the options, and returns the formatted string.
 
 ```php
 print (CsvTable::fromFile($file))->format(function ($header, $rows, $options) {
@@ -121,30 +210,40 @@ print (CsvTable::fromFile($file))->format(function ($header, $rows, $options) {
   }, $rows));
 });
 ```
-will produce CSV content:
-```csv
+
+will produce:
+
+```text
 col11|col12|col13
 =================
 col21|col22|col23
-col31|col32|col33     
+col31|col32|col33
 ```
 
 ### Custom formatter as a class with default `format` method
 
+When a class name is passed, its static `format()` method is called.
+
 ```php
-print (CsvTable::fromFile($file))->withoutHeader()->format(CustomFormatter::class);
+print (CsvTable::fromFile($file))
+  ->withoutHeader()
+  ->format(CustomFormatter::class);
 ```
 
 ### Custom formatter as a class with a custom method and options
 
 ```php
 $formatter_options = ['option1' => 'value1', 'option2' => 'value2'];
-print (CsvTable::fromFile($file))->withoutHeader()->format([CustomFormatter::class, 'customFormat'], $formatter_options);
+
+print (CsvTable::fromFile($file))
+  ->withoutHeader()
+  ->format([CustomFormatter::class, 'customFormat'], $formatter_options);
 ```
 
 ## Column Manipulation
 
 Given a CSV file with the following content:
+
 ```csv
 Name,Age,City,Country
 John,30,New York,USA
@@ -153,13 +252,16 @@ Jane,25,London,UK
 
 ### Reorder columns with `columnOrder()`
 
-Reorder columns by specifying the desired order. Columns not specified are
-appended in their original order.
+Reorder columns by specifying the desired order. Columns not specified are appended in their original order.
 
 ```php
-print (CsvTable::fromFile($file))->columnOrder(['City', 'Name'])->format('markdown_table');
+print (CsvTable::fromFile($file))
+  ->columnOrder(['City', 'Name'])
+  ->format('markdown_table');
 ```
+
 will produce:
+
 ```markdown
 | City     | Name | Age | Country |
 |----------|------|-----|---------|
@@ -169,12 +271,16 @@ will produce:
 
 ### Filter to specific columns with `onlyColumns()`
 
-Keep only the specified columns in the output.
+Keep only the specified columns in the output, in the order specified.
 
 ```php
-print (CsvTable::fromFile($file))->onlyColumns(['Name', 'City'])->format('markdown_table');
+print (CsvTable::fromFile($file))
+  ->onlyColumns(['Name', 'City'])
+  ->format('markdown_table');
 ```
+
 will produce:
+
 ```markdown
 | Name | City     |
 |------|----------|
@@ -184,12 +290,16 @@ will produce:
 
 ### Exclude columns with `withoutColumns()`
 
-Exclude specified columns from the output.
+Exclude specified columns from the output. The remaining columns keep their original order.
 
 ```php
-print (CsvTable::fromFile($file))->withoutColumns(['Age', 'Country'])->format('markdown_table');
+print (CsvTable::fromFile($file))
+  ->withoutColumns(['Age', 'Country'])
+  ->format('markdown_table');
 ```
+
 will produce:
+
 ```markdown
 | Name | City     |
 |------|----------|
@@ -199,15 +309,17 @@ will produce:
 
 ### Using column indices
 
-All column methods accept both column names (strings) and zero-based indices (integers).
+All column methods accept both column names (strings) and zero-based indices (integers). An unknown name or an out-of-range index throws an `InvalidArgumentException`.
 
 ```php
-// Using indices
+// Using indices.
 print (CsvTable::fromFile($file))->columnOrder([2, 0])->format();
 
-// Using mixed names and indices
+// Using mixed names and indices.
 print (CsvTable::fromFile($file))->onlyColumns(['Name', 2])->format();
 ```
+
+Names are resolved against the header, so content parsed with `withoutHeader()` can only be addressed by index.
 
 ### Combining column transformations
 
@@ -219,7 +331,9 @@ print (CsvTable::fromFile($file))
   ->columnOrder(['Country', 'City'])
   ->format('markdown_table');
 ```
+
 will produce:
+
 ```markdown
 | Country | City     | Name |
 |---------|----------|------|
@@ -229,20 +343,17 @@ will produce:
 
 ### Reset column transformations
 
+`resetColumns()` clears all three transformations at once. `resetColumnOrder()`, `resetOnlyColumns()` and `resetWithoutColumns()` clear them individually.
+
 ```php
 $table = CsvTable::fromFile($file);
 
-// Apply and use transformations
+// Apply and use transformations.
 $table->columnOrder(['City', 'Name']);
 print $table->format();
 
-// Reset and format without transformations
+// Reset and format without transformations.
 print $table->resetColumns()->format();
-
-// Individual reset methods are also available:
-// $table->resetColumnOrder();
-// $table->resetOnlyColumns();
-// $table->resetWithoutColumns();
 ```
 
 ## Contributing
