@@ -252,7 +252,7 @@ class CsvTable {
    * @throws \Exception
    *   When the file is not readable.
    */
-  public static function fromFile($filepath, $separator = ',', $enclosure = '"', $escape = '\\'): CsvTable {
+  public static function fromFile(string $filepath, string $separator = ',', string $enclosure = '"', string $escape = '\\'): CsvTable {
     if (!is_readable($filepath)) {
       throw new \Exception(sprintf('Unable to read the file %s.', $filepath));
     }
