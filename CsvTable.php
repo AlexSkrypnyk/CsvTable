@@ -215,24 +215,22 @@ class CsvTable {
 
     fwrite($stream, $this->csvString);
     rewind($stream);
+
     while (($row = fgetcsv($stream, 0, $this->csvSeparator, $this->csvEnclosure, $this->csvEscape)) !== FALSE) {
-      $rows[] = $row;
+      $rows[] = array_map(fn($value): string => $value ?? '', $row);
     }
+
     fclose($stream);
 
-    $this->header = $this->shouldParseHeader && count($rows) > 0
-      ? array_map(fn($value): string => $value ?? '', array_slice($rows, 0, 1)[0])
-      : [];
+    if (!$this->shouldParseHeader || $rows === []) {
+      $this->header = [];
+      $this->rows = $rows;
 
-    $this->rows = $this->shouldParseHeader && count($rows) > 0
-      ? array_map(
-        fn($row): array => array_map(fn($value): string => $value ?? '', $row),
-        array_slice($rows, 1)
-      )
-      : array_map(
-        fn($row): array => array_map(fn($value): string => $value ?? '', $row),
-        $rows
-      );
+      return;
+    }
+
+    $this->header = array_shift($rows);
+    $this->rows = $rows;
   }
 
   /**
@@ -337,6 +335,7 @@ class CsvTable {
     }
 
     $index = array_search($column, $header, TRUE);
+
     if ($index === FALSE) {
       throw new \InvalidArgumentException(sprintf('Column "%s" not found in header.', $column));
     }
@@ -365,10 +364,47 @@ class CsvTable {
       return;
     }
 
+    $indices = $this->resolveColumnIndices($total_columns);
+
+    $new_header = [];
+
+    foreach ($indices as $index) {
+      if (isset($this->header[$index])) {
+        $new_header[] = $this->header[$index];
+      }
+    }
+
+    $this->header = $new_header;
+
+    foreach ($this->rows as $i => $row) {
+      $new_row = [];
+
+      foreach ($indices as $index) {
+        $new_row[] = $row[$index] ?? '';
+      }
+
+      $this->rows[$i] = $new_row;
+    }
+  }
+
+  /**
+   * Resolve the column indices selected by the configured transformations.
+   *
+   * @param int $total_columns
+   *   Total number of columns.
+   *
+   * @return array<int>
+   *   Zero-based column indices in output order.
+   *
+   * @throws \InvalidArgumentException
+   *   When a column cannot be resolved.
+   */
+  protected function resolveColumnIndices(int $total_columns): array {
     $indices = range(0, $total_columns - 1);
 
     if ($this->onlyColumns !== NULL) {
       $indices = [];
+
       foreach ($this->onlyColumns as $column) {
         $indices[] = $this->resolveColumnIndex($column, $this->header, $total_columns);
       }
@@ -376,45 +412,35 @@ class CsvTable {
 
     if ($this->withoutColumns !== NULL) {
       $exclude_indices = [];
+
       foreach ($this->withoutColumns as $column) {
         $exclude_indices[] = $this->resolveColumnIndex($column, $this->header, $total_columns);
       }
+
       $indices = array_values(array_diff($indices, $exclude_indices));
     }
 
-    if ($this->columnOrder !== NULL) {
-      $ordered_indices = [];
-      foreach ($this->columnOrder as $column) {
-        $index = $this->resolveColumnIndex($column, $this->header, $total_columns);
-        if (in_array($index, $indices, TRUE)) {
-          $ordered_indices[] = $index;
-        }
-      }
-
-      foreach ($indices as $index) {
-        if (!in_array($index, $ordered_indices, TRUE)) {
-          $ordered_indices[] = $index;
-        }
-      }
-      $indices = $ordered_indices;
+    if ($this->columnOrder === NULL) {
+      return $indices;
     }
 
-    $new_header = [];
+    $ordered_indices = [];
+
+    foreach ($this->columnOrder as $column) {
+      $index = $this->resolveColumnIndex($column, $this->header, $total_columns);
+
+      if (in_array($index, $indices, TRUE)) {
+        $ordered_indices[] = $index;
+      }
+    }
+
     foreach ($indices as $index) {
-      if (isset($this->header[$index])) {
-        $new_header[] = $this->header[$index];
+      if (!in_array($index, $ordered_indices, TRUE)) {
+        $ordered_indices[] = $index;
       }
     }
-    $this->header = $new_header;
 
-    // Process each row individually to minimize memory.
-    foreach ($this->rows as $i => $row) {
-      $new_row = [];
-      foreach ($indices as $index) {
-        $new_row[] = $row[$index] ?? '';
-      }
-      $this->rows[$i] = $new_row;
-    }
+    return $ordered_indices;
   }
 
   /**
@@ -511,12 +537,12 @@ class CsvTable {
       'column_separator' => '|',
       'row_separator' => "\n",
       'header_separator' => '-',
-      'value_row_separator' => "<br/>",
+      'value_row_separator' => '<br/>',
     ];
 
     $process_value = fn(string $value): string => (string) preg_replace('/(\r\n|\n|\r)/', $options['value_row_separator'], $value);
 
-    $create_row = function (array $row, $widths) use ($options): string {
+    $create_row = function (array $row, array $widths) use ($options): string {
       $row = array_pad($row, count($widths), '');
 
       $output = array_map(
@@ -529,7 +555,7 @@ class CsvTable {
         . ' ' . $options['column_separator'] . $options['row_separator'];
     };
 
-    $create_header_separator = function ($widths) use ($options): string {
+    $create_header_separator = function (array $widths) use ($options): string {
       $output = $options['column_separator'];
 
       for ($i = 0; $i < count($widths) - 1; $i++) {
@@ -552,11 +578,13 @@ class CsvTable {
 
       for ($i = 0; $i < $max_columns; $i++) {
         $max_width = 0;
+
         foreach ($all_rows as $row) {
           if (isset($row[$i])) {
             $max_width = max($max_width, strlen($row[$i]));
           }
         }
+
         $widths[] = $max_width;
       }
     }
