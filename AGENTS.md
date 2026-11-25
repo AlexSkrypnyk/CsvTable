@@ -127,7 +127,7 @@ composer install
 3. **Rector** - PHP 8.3 modernization + code quality
   - Config: `rector.php`
   - Sets: `php83`, `deadCode`, `codeQuality`, `codingStyle`,
-    `typeDeclarations`, `naming`, `instanceOf`, `earlyReturn`,
+    `typeDeclarations`,
     `phpunitCodeQuality`
 
 ### Coding Conventions
